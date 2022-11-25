@@ -20,6 +20,7 @@ void raspunde(void *arg)
 	struct thData tdL; 
 	tdL= *((struct thData*)arg);
     //citeste informatia de la client
+  while(1){
 	if (read (tdL.cl, &nr,sizeof(int)) <= 0) 
 			{
 			  printf("[Thread %d]\n",tdL.idThread);
@@ -39,7 +40,7 @@ void raspunde(void *arg)
 		}
 	else
 		printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);	
-
+  }
 }
 
 static void *treat(void * arg) /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */

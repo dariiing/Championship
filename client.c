@@ -43,6 +43,7 @@ int main ()
     }
 
   /* citirea mesajului */
+  while(1){
   printf ("[client]Introduceti un numar: ");
   fflush (stdout);
   read (0, buf, sizeof(buf));
@@ -67,6 +68,7 @@ int main ()
   /* afisam mesajul primit */
   printf ("[client]Mesajul primit este: %d\n", nr);
 
-  /* inchidem conexiunea, am terminat */
-  close (sd);
+  }
+   /* inchidem conexiunea, am terminat */
+    close (sd);
 }
