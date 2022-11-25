@@ -16,8 +16,8 @@ int main ()
 {
   int sd;			             // descriptorul de socket
   struct sockaddr_in server;	// structura folosita pentru conectare 
-  // mesajul trimis
   int nr=0;
+  char command[200];
   char buf[10];
 
   /* cream socketul */
@@ -44,15 +44,15 @@ int main ()
 
   /* citirea mesajului */
   while(1){
-  printf ("[client]Introduceti un numar: ");
+  printf ("[client]Introduceti comanda: ");
   fflush (stdout);
-  read (0, buf, sizeof(buf));
-  nr=atoi(buf);
+  read (0, command, sizeof(command));
+  //nr=atoi(buf);
   
-  printf("[client] Am citit %d\n",nr);
+  printf("[client] Am citit %s\n",command);
 
   /* trimiterea mesajului la server */
-  if (write (sd,&nr,sizeof(int)) <= 0)
+  if (write (sd,&command,sizeof(command)) <= 0)
     {
       printf("[client]Eroare la write() spre server.\n");
       exit(1);
@@ -60,14 +60,14 @@ int main ()
 
   /* citirea raspunsului dat de server 
      (apel blocant pina cind serverul raspunde) */
-  if (read (sd, &nr,sizeof(int)) < 0)
+  if (read (sd, &command,sizeof(command)) < 0)
     {
       printf ("[client]Eroare la read() de la server.\n");
       exit(1);
     }
   /* afisam mesajul primit */
-  printf ("[client]Mesajul primit este: %d\n", nr);
-
+  printf ("[client]Mesajul primit este: %s\n", command);
+  memset(command, 0, sizeof(command));
   }
    /* inchidem conexiunea, am terminat */
     close (sd);
