@@ -17,30 +17,32 @@ typedef struct thData{
 void raspunde(void *arg)
 {
     int nr, i=0;
+    char command[200];
 	struct thData tdL; 
 	tdL= *((struct thData*)arg);
     //citeste informatia de la client
   while(1){
-	if (read (tdL.cl, &nr,sizeof(int)) <= 0) 
-			{
-			  printf("[Thread %d]\n",tdL.idThread);
-			  printf ("Eroare la read() de la client.\n");
+    memset(command, 0, sizeof(command));
+	  if (read (tdL.cl, &command,sizeof(command)) <= 0) 
+		  	{
+			    printf("[Thread %d]\n",tdL.idThread);
+			    printf ("Eroare la read() de la client.\n");
 			
-			}
+			  }
 	
-	printf ("[Thread %d] Mesajul a fost receptionat...%d\n",tdL.idThread, nr);	      
-	/*pregatim mesajul de raspuns */
-	nr++;      
-	printf("[Thread %d] Trimitem mesajul inapoi...%d\n",tdL.idThread, nr);
-	/* returnam mesajul clientului */
-	 if (write (tdL.cl, &nr, sizeof(int)) <= 0)
-		{
-		 printf("[Thread %d] ",tdL.idThread);
-		 printf("[Thread] Eroare la write() catre client.\n");
-		}
-	else
-		printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);	
-  }
+  	printf ("[Thread %d] Mesajul a fost receptionat...%s\n",tdL.idThread, command);	      
+	  /*pregatim mesajul de raspuns */
+	  strcat(command, " success");    
+	  printf("[Thread %d] Trimitem mesajul inapoi...%s\n",tdL.idThread, command);
+	  /* returnam mesajul clientului */
+	  if (write (tdL.cl, &command, sizeof(command)) <= 0)
+		  {
+		  printf("[Thread %d] ",tdL.idThread);
+		  printf("[Thread] Eroare la write() catre client.\n");
+		  }
+	  else
+		  printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);	
+    }
 }
 
 static void *treat(void * arg) /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */
