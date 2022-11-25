@@ -23,8 +23,8 @@ int main ()
   /* cream socketul */
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
     {
-      perror ("Eroare la socket().\n");
-      return errno;
+      printf("Eroare la socket().\n");
+      exit(1);
     }
 
   /* umplem structura folosita pentru realizarea conexiunii cu serverul */
@@ -38,8 +38,8 @@ int main ()
   /* ne conectam la server */
   if (connect (sd, (struct sockaddr *) &server,sizeof (struct sockaddr)) == -1)
     {
-      perror ("[client]Eroare la connect().\n");
-      return errno;
+      printf ("[client]Eroare la connect().\n");
+      exit(1);
     }
 
   /* citirea mesajului */
@@ -54,16 +54,16 @@ int main ()
   /* trimiterea mesajului la server */
   if (write (sd,&nr,sizeof(int)) <= 0)
     {
-      perror ("[client]Eroare la write() spre server.\n");
-      return errno;
+      printf("[client]Eroare la write() spre server.\n");
+      exit(1);
     }
 
   /* citirea raspunsului dat de server 
      (apel blocant pina cind serverul raspunde) */
   if (read (sd, &nr,sizeof(int)) < 0)
     {
-      perror ("[client]Eroare la read() de la server.\n");
-      return errno;
+      printf ("[client]Eroare la read() de la server.\n");
+      exit(1);
     }
   /* afisam mesajul primit */
   printf ("[client]Mesajul primit este: %d\n", nr);
