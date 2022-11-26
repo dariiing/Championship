@@ -16,11 +16,12 @@ typedef struct thData{
 
 void raspunde(void *arg)
 {
-    int nr, i=0;
-    char command[200];
+  int nr, i=0, login = 0;
+  char command[200];
 	struct thData tdL; 
 	tdL= *((struct thData*)arg);
-    //citeste informatia de la client
+  
+  //citeste informatia de la client
   while(1){
     memset(command, 0, sizeof(command));
 	  if (read (tdL.cl, &command,sizeof(command)) <= 0) 
@@ -31,8 +32,37 @@ void raspunde(void *arg)
 			  }
 	
   	printf ("[Thread %d] Mesajul a fost receptionat...%s\n",tdL.idThread, command);	      
-	  /*pregatim mesajul de raspuns */
-	  strcat(command, " success");    
+    
+    //raspundem pe cazuri
+    if(strstr(command,"quit")!=NULL){
+      printf("Clientul %d pleaca\n",tdL.idThread);
+      strcpy(command,"Goodbye"); //trimite clientului
+    }
+	  if( strstr(command,"login")!=NULL && login == 0){
+      printf("Login initiated\n");
+      login = 1;
+      strcpy(command,"Welcome back\n");
+    }
+    else if(strstr(command,"login")!=NULL && login == 1){
+      printf("Already logged\n");
+      strcpy(command,"Already logged in\n");
+    }
+    if(strstr(command,"logout")!=NULL && login == 1){
+      printf("Logout succesfully\n");
+      login = 0;
+      strcpy(command,"Logged out\n");
+    }
+    else if(strstr(command,"logout")!=NULL && login == 0){
+      printf("Logout failed\n");
+      login = 0;
+      strcpy(command,"Not logged in\n");
+    }
+    else{ // nu recunoaste nicio comanda
+      printf("Unknown command\n");
+      strcpy(command,"Unknown command, try again\n");
+    }
+
+    
 	  printf("[Thread %d] Trimitem mesajul inapoi...%s\n",tdL.idThread, command);
 	  /* returnam mesajul clientului */
 	  if (write (tdL.cl, &command, sizeof(command)) <= 0)
@@ -40,9 +70,14 @@ void raspunde(void *arg)
 		  printf("[Thread %d] ",tdL.idThread);
 		  printf("[Thread] Eroare la write() catre client.\n");
 		  }
-	  else
-		  printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);	
+	  else {
+       printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);
+    }	
+
+    if(strstr(command,"Goodbye")!=NULL){
+      break; // iesim din while pentru acest client
     }
+  }
 }
 
 static void *treat(void * arg) /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */
