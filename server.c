@@ -9,14 +9,102 @@
 #include <signal.h>
 #include <pthread.h>
 
+
+//variabile globale
+int login = 0;   //pt logare
+int normal = 0; //clienti normali
+int admin = 0; //admini
+
 typedef struct thData{
 	int idThread; //id-ul thread-ului tinut in evidenta de acest program
 	int cl; //descriptorul intors de accept
 }thData;
 
+void case_answer(int idThread,char command[200]){
+
+  if(strstr(command,"show championships")!= NULL && login == 1){
+    printf("Showing championships\n");
+    strcpy(command,"The list of championships\n");
+  }
+  else if(strstr(command,"show championships")!= NULL && login== 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login first");
+  }
+  else if(strstr(command,"participate")!= NULL && normal == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login first");
+  }
+  else if(strstr(command,"participate")!= NULL && normal == 1){
+    printf("Request for participation\n");
+    strcpy(command,"Request sent. Check your email to see details");
+  }
+  else if(strstr(command,"reschedule")!= NULL && normal == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login first");
+  }
+  else if(strstr(command,"reschedule")!= NULL && normal == 1){
+    printf("Reschedule options\n");
+    strcpy(command,"Rescheduling");
+  }
+  else if(strstr(command,"create")!= NULL && admin == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login as admin");
+  }
+  else if(strstr(command,"create")!= NULL && admin == 1){
+    printf("Created\n");
+    strcpy(command,"Championship created");
+  }
+  else if(strstr(command,"edit")!= NULL && admin == 1){
+    printf("Edited\n");
+    strcpy(command,"Edited details");
+  }
+  else if(strstr(command,"edit")!= NULL && admin == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login as admin");
+  }
+  else if(strstr(command,"history")!= NULL && admin == 1){
+    printf("History\n");
+    strcpy(command,"History");
+  }
+  else if(strstr(command,"history")!= NULL && admin == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login as admin");
+  }
+  else if(strstr(command,"quit")!=NULL){
+      printf("Clientul %d pleaca\n",idThread);
+      strcpy(command,"Goodbye"); //trimite clientului
+    }
+	else if( strstr(command,"login")!=NULL && login == 0){
+      printf("Login initiated\n");
+      login = 1;
+      admin = 1;
+      normal = 1;
+      strcpy(command,"Welcome back\n");
+    }
+  else if(strstr(command,"login")!=NULL && login == 1){
+      printf("Already logged\n");
+      strcpy(command,"Already logged in\n");
+    }
+  else if(strstr(command,"logout")!=NULL && login == 1){
+      printf("Logout succesfully\n");
+      login = 0;
+      admin = 0;
+      normal = 0;
+      strcpy(command,"Logged out\n");
+    }
+  else if(strstr(command,"logout")!=NULL && login == 0){
+      printf("Logout failed\n");
+      login = 0;
+      strcpy(command,"Not logged in\n");
+    }
+  else{ // nu recunoaste nicio comanda
+      printf("Unknown command\n");
+      strcpy(command,"Unknown command, try again\n");
+    }
+}
 void raspunde(void *arg)
 {
-  int nr, i=0, login = 0;
+  int nr, i=0;
   char command[200];
 	struct thData tdL; 
 	tdL= *((struct thData*)arg);
@@ -34,35 +122,8 @@ void raspunde(void *arg)
   	printf ("[Thread %d] Mesajul a fost receptionat...%s\n",tdL.idThread, command);	      
     
     //raspundem pe cazuri
-    if(strstr(command,"quit")!=NULL){
-      printf("Clientul %d pleaca\n",tdL.idThread);
-      strcpy(command,"Goodbye"); //trimite clientului
-    }
-	  if( strstr(command,"login")!=NULL && login == 0){
-      printf("Login initiated\n");
-      login = 1;
-      strcpy(command,"Welcome back\n");
-    }
-    else if(strstr(command,"login")!=NULL && login == 1){
-      printf("Already logged\n");
-      strcpy(command,"Already logged in\n");
-    }
-    if(strstr(command,"logout")!=NULL && login == 1){
-      printf("Logout succesfully\n");
-      login = 0;
-      strcpy(command,"Logged out\n");
-    }
-    else if(strstr(command,"logout")!=NULL && login == 0){
-      printf("Logout failed\n");
-      login = 0;
-      strcpy(command,"Not logged in\n");
-    }
-    else{ // nu recunoaste nicio comanda
-      printf("Unknown command\n");
-      strcpy(command,"Unknown command, try again\n");
-    }
+    case_answer(tdL.idThread,command);
 
-    
 	  printf("[Thread %d] Trimitem mesajul inapoi...%s\n",tdL.idThread, command);
 	  /* returnam mesajul clientului */
 	  if (write (tdL.cl, &command, sizeof(command)) <= 0)
