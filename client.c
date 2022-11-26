@@ -65,10 +65,18 @@ int main ()
       printf ("[client]Eroare la read() de la server.\n");
       exit(1);
     }
+
+  //verificam ce a trimis serverul
   /* afisam mesajul primit */
   printf ("[client]Mesajul primit este: %s\n", command);
-  memset(command, 0, sizeof(command));
-  }
-   /* inchidem conexiunea, am terminat */
+  
+  if(strstr(command,"Goodbye")!=NULL){
+     /* inchidem conexiunea, am terminat */
     close (sd);
+    break;
+  }
+  memset(command, 0, sizeof(command));
+  //close (sd);
+  }
+  
 }
