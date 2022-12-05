@@ -9,16 +9,13 @@
 #include <netdb.h>
 #include <string.h>
 
-/* stabilim portul */
-  int port = 2009;
+int port = 2009;
 
 int main ()
 {
-  int sd;			             // descriptorul de socket
+  int sd;			                // descriptorul de socket
   struct sockaddr_in server;	// structura folosita pentru conectare 
-  int nr=0;
   char command[200];
-  char buf[10];
 
   /* cream socketul */
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
@@ -27,7 +24,6 @@ int main ()
       exit(1);
     }
 
-  /* umplem structura folosita pentru realizarea conexiunii cu serverul */
   /* familia socket-ului */
   server.sin_family = AF_INET;
   /* adresa IP a serverului */
@@ -35,31 +31,24 @@ int main ()
   /* portul de conectare */
   server.sin_port = htons (port);
   
-  /* ne conectam la server */
   if (connect (sd, (struct sockaddr *) &server,sizeof (struct sockaddr)) == -1)
     {
       printf ("[client]Eroare la connect().\n");
       exit(1);
     }
 
-  /* citirea mesajului */
   while(1){
   printf ("[client]Introduceti comanda: ");
   fflush (stdout);
   read (0, command, sizeof(command));
-  //nr=atoi(buf);
   
   printf("[client] Am citit %s\n",command);
-
-  /* trimiterea mesajului la server */
   if (write (sd,&command,sizeof(command)) <= 0)
     {
       printf("[client]Eroare la write() spre server.\n");
       exit(1);
     }
 
-  /* citirea raspunsului dat de server 
-     (apel blocant pina cind serverul raspunde) */
   if (read (sd, &command,sizeof(command)) < 0)
     {
       printf ("[client]Eroare la read() de la server.\n");
@@ -67,16 +56,13 @@ int main ()
     }
 
   //verificam ce a trimis serverul
-  /* afisam mesajul primit */
   printf ("[client]Mesajul primit este: %s\n", command);
-  
   if(strstr(command,"Goodbye")!=NULL){
-     /* inchidem conexiunea, am terminat */
     close (sd);
     break;
   }
+
   memset(command, 0, sizeof(command));
-  //close (sd);
   }
   
 }

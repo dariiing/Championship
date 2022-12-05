@@ -8,20 +8,25 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
-
+#include <sqlite3.h>
 
 //variabile globale
 int login = 0;   //pt logare
 int normal = 0; //clienti normali
 int admin = 0; //admini
+sqlite3 *db;
+int rc;
+char *zErrMsg = 0;
 
 typedef struct thData{
 	int idThread; //id-ul thread-ului tinut in evidenta de acest program
 	int cl; //descriptorul intors de accept
 }thData;
 
-void case_answer(int idThread,char command[200]){
 
+
+void case_answer(int idThread,char command[]){
+  char* sql;
   if(strstr(command,"show championships")!= NULL && login == 1){
     printf("Showing championships\n");
     strcpy(command,"The list of championships\n");
@@ -72,10 +77,11 @@ void case_answer(int idThread,char command[200]){
   }
   else if(strstr(command,"quit")!=NULL){
       printf("Clientul %d pleaca\n",idThread);
-      strcpy(command,"Goodbye"); //trimite clientului
+      strcpy(command,"Goodbye"); 
     }
 	else if( strstr(command,"login")!=NULL && login == 0){
       printf("Login initiated\n");
+      char *sql;
       login = 1;
       admin = 1;
       normal = 1;
@@ -112,6 +118,7 @@ void raspunde(void *arg)
   //citeste informatia de la client
   while(1){
     memset(command, 0, sizeof(command));
+
 	  if (read (tdL.cl, &command,sizeof(command)) <= 0) 
 		  	{
 			    printf("[Thread %d]\n",tdL.idThread);
@@ -125,7 +132,7 @@ void raspunde(void *arg)
     case_answer(tdL.idThread,command);
 
 	  printf("[Thread %d] Trimitem mesajul inapoi...%s\n",tdL.idThread, command);
-	  /* returnam mesajul clientului */
+
 	  if (write (tdL.cl, &command, sizeof(command)) <= 0)
 		  {
 		  printf("[Thread %d] ",tdL.idThread);
@@ -201,6 +208,18 @@ int main ()
       printf ("[server] Eroare la listen().\n");
       exit(1);
     }
+
+  //opening the database containing all the information
+
+  rc = sqlite3_open("test.db", &db);
+  if(rc){
+    printf("Can't open database: %s\n", sqlite3_errmsg(db));
+    exit(1);
+  }
+  else{
+    printf("Opened database\n");
+  }
+
   /* servim in mod concurent clientii...folosind thread-uri */
   while (1)
     {
@@ -228,5 +247,6 @@ int main ()
 	pthread_create(&th[i], NULL, &treat, td);	      
 				
 	}
-    return 0; 
+  sqlite3_close(db);
+  return 0; 
 }
