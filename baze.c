@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
    sql = "CREATE TABLE ACCOUNTS(" \
       "USERNAME CHAR(10) NOT NULL,"\
       "NAME TEXT NOT NULL,"\
+      "ADMIN INT NOT NULL,"\
       "ID CHAR(4) PRIMARY KEY NOT NULL);";
 
    /* Execute SQL statement */
@@ -60,14 +61,14 @@ int main(int argc, char* argv[]) {
       printf("Table created successfully\n");
    }
 
-   sql = "INSERT INTO ACCOUNTS (USERNAME, NAME,ID) "  \
-         "VALUES ('daria', 'Daria', 1); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ID) "  \
-         "VALUES ('paul', 'Paul', 2); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ID) "  \
-         "VALUES ('andreea', 'Andreea', 3); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ID) "  \
-         "VALUES ('stefan', 'Stefan', 4); " \
+   sql = "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
+         "VALUES ('daria', 'Daria', 1, 1); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
+         "VALUES ('paul', 'Paul', 0, 2); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME, ADMIN, ID) "  \
+         "VALUES ('andreea', 'Andreea', 1, 3); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
+         "VALUES ('stefan', 'Stefan', 0, 4); " \
          "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE) "  \
          "VALUES ('International Chess', 'sah', 2, 'one round'); " \
         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE) "  \

@@ -26,9 +26,10 @@ typedef struct thData{
 
 void search_username(char command[])
 {
-  const char *user;
+      const char *user;
+      const char *type;
       sqlite3_stmt *stmt;
-      sqlite3_prepare_v2(db,"select username from accounts",-1,&stmt,0);
+      sqlite3_prepare_v2(db,"select username, admin from accounts",-1,&stmt,0);
       while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    user=sqlite3_column_text(stmt,0);
@@ -36,9 +37,12 @@ void search_username(char command[])
 		    if(strstr(command,user)!=0) 
 		      {
             login = 1;
-            admin = 1;
-            normal = 1;
             strcpy(command,"Welcome back\n");
+            //se verifica tipul de utilizator
+            type = (const char *)sqlite3_column_text(stmt, 1);
+            int x = atoi(type);
+            if(x == 1) admin = 1;
+            else normal = 1;
           }
         sqlite3_close(db);
 	    }
