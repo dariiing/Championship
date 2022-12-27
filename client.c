@@ -11,6 +11,18 @@
 
 int port = 2009;
 
+void read_file()
+{
+  FILE *fp;
+  fp = fopen("championships.txt","r");
+  char buffer[256];
+  while (fgets(buffer, 256, fp)){
+        printf("%s", buffer);
+  }
+  printf("\n\n\n");
+  fclose(fp);
+}
+
 int main ()
 {
   int sd;			                // descriptorul de socket
@@ -57,6 +69,9 @@ int main ()
 
   //verificam ce a trimis serverul
   printf ("[client]Mesajul primit este: %s\n", command);
+  if(strstr(command,"The list of championships")!=NULL){
+      read_file();
+  }
   if(strstr(command,"Goodbye")!=NULL){
     close (sd);
     break;

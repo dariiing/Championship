@@ -51,11 +51,51 @@ void search_username(char command[])
       }
       login_initiated = 0;
 }
+void show_championships()
+{
+  FILE* fp;
+  fp = fopen("championships.txt", "w+");
+  fprintf(fp,"\n\n");
+  fprintf(fp,"CHAMPIONSHIPS DETAILS                   \n");
+  fprintf(fp,"----------------------------------------\n");
+  const char *name;
+  const char *type;
+  const char *nb;
+  const char *structure;
+  const char *date;
+  sqlite3_stmt *stmt;
+  sqlite3_prepare_v2(db,"select name, type, nb_players, structure, games  from championships",-1,&stmt,0);
+  while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    { 
+        name=sqlite3_column_text(stmt,0);
+        fprintf(fp,"Name: %s\n", name);
+        type=sqlite3_column_text(stmt,1);
+        fprintf(fp,"Type: %s\n", type);
+        nb=sqlite3_column_text(stmt,2);
+        fprintf(fp,"Nb of players: %s\n", nb);
+        structure=sqlite3_column_text(stmt,3);
+        fprintf(fp,"Structure: %s\n", structure);
+        date=sqlite3_column_text(stmt,4);
+        fprintf(fp,"Date: %s\n", date);
+        fprintf(fp,"----------------------------------------\n");
+        sqlite3_close(db);
+	    }
+  fclose(fp);
+}
+
+void delete_file()
+{
+  if (remove("championships.txt") == 0)
+      printf("Deleted successfully\n");
+   else
+      printf("Unable to delete the file\n");
+}
 
 void case_answer(int idThread,char command[]){
-  char* sql;
+
   if(strstr(command,"show championships")!= NULL && login == 1){
     printf("Showing championships\n");
+    show_championships();
     strcpy(command,"The list of championships\n");
   }
   else if(strstr(command,"show championships")!= NULL && login== 0){
@@ -105,6 +145,7 @@ void case_answer(int idThread,char command[]){
   else if(strstr(command,"quit")!=NULL){
       printf("Clientul %d pleaca\n",idThread);
       strcpy(command,"Goodbye"); 
+      delete_file();
     }
 	else if( strstr(command,"login")!=NULL && login == 0){
       printf("Login initiated\n");
@@ -120,6 +161,7 @@ void case_answer(int idThread,char command[]){
       login = 0;
       admin = 0;
       normal = 0;
+      delete_file();
       strcpy(command,"Logged out\n");
     }
   else if(strstr(command,"logout")!=NULL && login == 0){
@@ -127,7 +169,7 @@ void case_answer(int idThread,char command[]){
       login = 0;
       strcpy(command,"Not logged in\n");
     }
-  else if (login_initiated == 1){
+  else if (login_initiated == 1){ // cauta username-ul
      search_username(command);
   }
   else{ // nu recunoaste nicio comanda
