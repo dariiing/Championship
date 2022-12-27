@@ -83,12 +83,40 @@ void show_championships()
   fclose(fp);
 }
 
+void show_history()
+{
+  FILE* fp;
+  fp = fopen("history.txt", "w+");
+  fprintf(fp,"\n\n");
+  fprintf(fp,"CHAMPIONSHIPS HISTORY                   \n");
+  fprintf(fp,"----------------------------------------\n");
+  const char *name;
+  const char *history;
+  sqlite3_stmt *stmt;
+  sqlite3_prepare_v2(db,"select name, history from championships",-1,&stmt,0);
+  while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    { 
+        name=sqlite3_column_text(stmt,0);
+        fprintf(fp,"Name: %s\n", name);
+        history=sqlite3_column_text(stmt,1);
+        fprintf(fp,"History: %s\n", history);
+        fprintf(fp,"----------------------------------------\n");
+        sqlite3_close(db);
+	    }
+  fclose(fp);
+}
+
 void delete_file()
 {
   if (remove("championships.txt") == 0)
       printf("Deleted successfully\n");
    else
-      printf("Unable to delete the file\n");
+      printf("Already deleted\n");
+      
+  if (remove("history.txt") == 0)
+      printf("Deleted successfully\n");
+   else
+      printf("Already deleted\n");
 }
 
 void case_answer(int idThread,char command[]){
@@ -136,6 +164,7 @@ void case_answer(int idThread,char command[]){
   }
   else if(strstr(command,"history")!= NULL && admin == 1){
     printf("History\n");
+    show_history();
     strcpy(command,"History");
   }
   else if(strstr(command,"history")!= NULL && admin == 0){

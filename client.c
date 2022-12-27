@@ -11,10 +11,15 @@
 
 int port = 2009;
 
-void read_file()
+void read_file(char command[])
 {
   FILE *fp;
-  fp = fopen("championships.txt","r");
+  if(strstr(command,"History")!=NULL){
+    fp = fopen("history.txt","r");
+  }
+  else{
+    fp = fopen("championships.txt","r");
+  }
   char buffer[256];
   while (fgets(buffer, 256, fp)){
         printf("%s", buffer);
@@ -69,8 +74,8 @@ int main ()
 
   //verificam ce a trimis serverul
   printf ("[client]Mesajul primit este: %s\n", command);
-  if(strstr(command,"The list of championships")!=NULL){
-      read_file();
+  if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
+      read_file(command);
   }
   if(strstr(command,"Goodbye")!=NULL){
     close (sd);
