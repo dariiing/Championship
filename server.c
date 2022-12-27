@@ -12,6 +12,7 @@
 
 //variabile globale
 int login = 0;   //pt logare
+int login_initiated = 0;
 int normal = 0; //clienti normali
 int admin = 0; //admini
 sqlite3 *db;
@@ -23,7 +24,29 @@ typedef struct thData{
 	int cl; //descriptorul intors de accept
 }thData;
 
-
+void search_username(char command[])
+{
+  const char *user;
+      sqlite3_stmt *stmt;
+      sqlite3_prepare_v2(db,"select username from accounts",-1,&stmt,0);
+      while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    {
+		    user=sqlite3_column_text(stmt,0);
+        printf("Verifying every username\n");
+		    if(strstr(command,user)!=0) 
+		      {
+            login = 1;
+            admin = 1;
+            normal = 1;
+            strcpy(command,"Welcome back\n");
+          }
+        sqlite3_close(db);
+	    }
+      if(login == 0) { 
+        strcpy(command,"Username not found. Try again\n");
+      }
+      login_initiated = 0;
+}
 
 void case_answer(int idThread,char command[]){
   char* sql;
@@ -81,11 +104,8 @@ void case_answer(int idThread,char command[]){
     }
 	else if( strstr(command,"login")!=NULL && login == 0){
       printf("Login initiated\n");
-      char *sql;
-      login = 1;
-      admin = 1;
-      normal = 1;
-      strcpy(command,"Welcome back\n");
+      strcpy(command,"Write your username");
+      login_initiated = 1;
     }
   else if(strstr(command,"login")!=NULL && login == 1){
       printf("Already logged\n");
@@ -103,6 +123,9 @@ void case_answer(int idThread,char command[]){
       login = 0;
       strcpy(command,"Not logged in\n");
     }
+  else if (login_initiated == 1){
+     search_username(command);
+  }
   else{ // nu recunoaste nicio comanda
       printf("Unknown command\n");
       strcpy(command,"Unknown command, try again\n");
@@ -239,7 +262,7 @@ int main ()
 	}
 	// int idThread; //id-ul threadului
 	// int cl; //descriptorul intors de accept
-    //in struct incrementez numarul de thread-uri si ii asignez clientul curent
+  //in struct incrementez numarul de thread-uri si ii asignez clientul curent
 	td=(struct thData*)malloc(sizeof(struct thData));	
 	td->idThread=i++;
 	td->cl=client;
