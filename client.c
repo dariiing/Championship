@@ -55,11 +55,11 @@ int main ()
     }
 
   while(1){
-  printf ("[client]Introduceti comanda: ");
+  printf ("Enter your command: ");
   fflush (stdout);
   read (0, command, sizeof(command));
   
-  printf("[client] Am citit %s\n",command);
+  //printf("[client] Am citit %s\n",command);
   if (write (sd,&command,sizeof(command)) <= 0)
     {
       printf("[client]Eroare la write() spre server.\n");
@@ -73,7 +73,7 @@ int main ()
     }
 
   //verificam ce a trimis serverul
-  printf ("[client]Mesajul primit este: %s\n", command);
+  printf ("From server: %s\n", command);
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
       read_file(command);
   }

@@ -51,6 +51,7 @@ void search_username(char command[])
       }
       login_initiated = 0;
 }
+
 void show_championships()
 {
   FILE* fp;
@@ -112,7 +113,7 @@ void delete_file()
       printf("Deleted successfully\n");
    else
       printf("Already deleted\n");
-      
+
   if (remove("history.txt") == 0)
       printf("Deleted successfully\n");
    else
