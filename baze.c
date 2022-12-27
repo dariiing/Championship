@@ -81,14 +81,14 @@ int main(int argc, char* argv[]) {
    } else {
       printf("Records created successfully\n");
    }
-   sql = "SELECT COUNT(*) FROM ACCOUNTS WHERE USERNAME='daria'";
-   rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+   // sql = "SELECT COUNT(*) FROM ACCOUNTS WHERE USERNAME='daria'";
+   // rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
    
-   if( rc != SQLITE_OK ){
-      printf("SQL error: %s\n", zErrMsg);
-   } else {
-      printf("Records created successfully\n");
-   }
+   // if( rc != SQLITE_OK ){
+   //    printf("SQL error: %s\n", zErrMsg);
+   // } else {
+   //    printf("Records created successfully\n");
+   // }
    sqlite3_close(db);
    return 0;
 }
