@@ -79,55 +79,61 @@ int main ()
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
       read_file(command);
   }
-  // else if(strstr(command,"Write the details")!=NULL){
-  //   char sql[400] = "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,GAMES) VALUES ('";
-  //   sqlite3_stmt *stmt;
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,command);//nume
-  //   strcat(sql,"'");
-  //   strcat(sql,",");
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,"'");
-  //   strcat(sql,command); //tip
-  //   strcat(sql,"'");
-  //   strcat(sql,",");
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,command);//nb
-  //   strcat(sql,",");
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,"'");
-  //   strcat(sql,command);//struct
-  //   strcat(sql,"'");
-  //   strcat(sql,",");
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,"'");
-  //   strcat(sql,command);//history
-  //   strcat(sql,"'");
-  //   strcat(sql,",");
-  //   memset(command, 0, sizeof(command));
-  //   read (0, command, sizeof(command));
-  //   command[strlen(command)-1]='\0';
-  //   strcat(sql,"'");
-  //   strcat(sql,command);//games
-  //   strcat(sql,"');");
-  //   printf("%s\n",sql);
-  //   int rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
-  //   if( rc != SQLITE_DONE ){
-  //     printf("SQL error: %s\n", zErrMsg);
-  //  } else {
-  //     printf("Records created successfully\n");
-  //  }
-  // }
+  else if(strstr(command,"Write the details")!=NULL){
+    char sql[400] = "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES) VALUES ('";
+    sqlite3_stmt *stmt;
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,command);//nume
+    strcat(sql,"'");
+    strcat(sql,",");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,"'");
+    strcat(sql,command); //tip
+    strcat(sql,"'");
+    strcat(sql,",");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,command);//nb
+    strcat(sql,",");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,"'");
+    strcat(sql,command);//struct
+    strcat(sql,"'");
+    strcat(sql,",");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,"'");
+    strcat(sql,command);//history
+    strcat(sql,"'");
+    strcat(sql,",");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,"'");
+    strcat(sql,command);//WINNER
+    strcat(sql,"',");
+    memset(command, 0, sizeof(command));
+    read (0, command, sizeof(command));
+    command[strlen(command)-1]='\0';
+    strcat(sql,"'");
+    strcat(sql,command);//games
+    strcat(sql,"');");
+    printf("%s\n",sql);
+    int rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+    if( rc != SQLITE_OK ){
+      printf("SQL error: %s\n", zErrMsg);
+   } else {
+      printf("Records created successfully\n");
+   }
+  }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
     break;

@@ -11,15 +11,20 @@
 #include <sqlite3.h>   // baza de date
 #include <curl/curl.h> // pentru email
 
+
 //variabile globale
 int login = 0;   //pt logare
 int login_initiated = 0;
 int create_initiated = 0;
+int participate_initiated = 0;
 int normal = 0; //clienti normali
 int admin = 0; //admini
 sqlite3 *db;
 int rc;
 char *zErrMsg = 0;
+char username[30];
+char strong[30];
+char weak[30];
 
 typedef struct thData{
 	int idThread; //id-ul thread-ului tinut in evidenta de acest program
@@ -29,19 +34,31 @@ typedef struct thData{
 void search_username(char command[])
 {
       const char *user;
+      const char *st;
+      const char *we;
       const char *type;
       sqlite3_stmt *stmt;
-      sqlite3_prepare_v2(db,"select username, admin from accounts",-1,&stmt,0);
+      sqlite3_prepare_v2(db,"select username, strong, weak, admin from accounts",-1,&stmt,0);
       while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    user=sqlite3_column_text(stmt,0);
         printf("Verifying every username\n");
 		    if(strstr(command,user)!=0) 
 		      {
+            strcpy(username,command);
+            username[strlen(username)-1]='\0';
+            printf("%s found\n",username);
+
+            st=sqlite3_column_text(stmt,1);
+            we=sqlite3_column_text(stmt,2);
+            strcpy(strong,st);
+            strcpy(weak,we);
+            printf("%s found\n",strong);
+            printf("%s found\n",weak);
             login = 1;
             strcpy(command,"Welcome back\n");
             //se verifica tipul de utilizator
-            type = (const char *)sqlite3_column_text(stmt, 1);
+            type = (const char *)sqlite3_column_text(stmt, 3);
             int x = atoi(type);
             if(x == 1) admin = 1;
             else normal = 1;
@@ -95,14 +112,17 @@ void show_history()
   fprintf(fp,"----------------------------------------\n");
   const char *name;
   const char *history;
+  const char *winner;
   sqlite3_stmt *stmt;
-  sqlite3_prepare_v2(db,"select name, history from championships",-1,&stmt,0);
+  sqlite3_prepare_v2(db,"select name, history, winner from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    { 
         name=sqlite3_column_text(stmt,0);
         fprintf(fp,"Name: %s\n", name);
         history=sqlite3_column_text(stmt,1);
         fprintf(fp,"History: %s\n", history);
+        winner=sqlite3_column_text(stmt,2);
+        fprintf(fp,"Last winner: %s\n", winner);
         fprintf(fp,"----------------------------------------\n");
         sqlite3_close(db);
 	    }
@@ -132,7 +152,68 @@ size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
   return retcode;
 }
 
+int verify_name(char command[])
+{
+  const char *user;
+  sqlite3_stmt *stmt;
+  sqlite3_prepare_v2(db,"select name from championships",-1,&stmt,0);
+  while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    {
+		    user=sqlite3_column_text(stmt,0);
+        printf("Verifying every championship name\n");
+		    if(strstr(command,user)!=0) 
+		      {
+            return 1;
+          }
+        sqlite3_close(db);
+	    }
+  return 0;
+}
 
+void create_email(char command[])
+{
+  FILE *fp = fopen("email.txt", "w+");
+  fprintf(fp,"\n\n");
+  sqlite3_stmt *stmt;
+  const char *name;
+  const char *type;
+  const char *nb;
+  const char *structure;
+  const char *date;
+  
+  sqlite3_prepare_v2(db,"select name, type,nb_players, structure, games from championships",-1,&stmt,0);
+  while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    {
+		    name=sqlite3_column_text(stmt,0);
+		    if(strstr(command,name)!=0) 
+		      {
+            type=sqlite3_column_text(stmt,1);
+            if(strstr(type,weak)==0){
+            fprintf(fp, "Congratulations, %s!\n", username);
+            fprintf(fp, "You've been accepted to this championship. See details below:\n");
+            fprintf(fp,"----------------------------------------\n");
+            fprintf(fp, "Name: %s\n", name);
+            fprintf(fp, "Type: %s\n", type);
+            nb=sqlite3_column_text(stmt,2);
+            fprintf(fp, "Number of players: %s\n", nb);
+            structure=sqlite3_column_text(stmt,3);
+            fprintf(fp, "Structure: %s\n", structure);
+            date=sqlite3_column_text(stmt,4);
+            fprintf(fp, "Date: %s\n", date);
+            fprintf(fp,"----------------------------------------\n");
+            fprintf(fp, "Good luck!\n");
+            }
+            else {
+              fprintf(fp, "Hello %s,\n You haven't been accepted to %s.\n",username, name);
+              fprintf(fp, "Try another championship, following your strong points: %s.\n", strong);
+              fprintf(fp, "Good luck!\n");
+              fprintf(fp,"----------------------------------------\n");
+            }
+          }
+        sqlite3_close(db);
+	    }
+  fclose(fp);
+}
 void send_email ()
 {
     printf("Request for participation\n");
@@ -152,8 +233,8 @@ void send_email ()
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
     
     
-    show_championships();
-    FILE *fp = fopen("championships.txt", "rb");
+    //show_championships();
+    FILE *fp = fopen("email.txt", "rb");
     
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
     curl_easy_setopt(curl, CURLOPT_READDATA, (void *)fp);
@@ -169,6 +250,7 @@ void send_email ()
     fclose(fp);
   }
 }
+
 void case_answer(int idThread,char command[]){
 
   if(strstr(command,"show championships")!= NULL && login == 1){
@@ -181,12 +263,12 @@ void case_answer(int idThread,char command[]){
     strcpy(command,"Please login first");
   }
   else if(strstr(command,"participate")!= NULL && normal == 0){
-    printf("Not logged in\n");
+    printf("Admin mode\n");
     strcpy(command,"You're on admin mode\n");
   }
   else if(strstr(command,"participate")!= NULL && normal == 1){
-    send_email();
-    strcpy(command,"Request sent. Check your email to see details");
+    participate_initiated = 1;
+    strcpy(command,"Write the name of the championship");
   }
   else if(strstr(command,"reschedule")!= NULL && normal == 0){
     printf("Not logged in\n");
@@ -255,6 +337,18 @@ void case_answer(int idThread,char command[]){
   else if(create_initiated == 1){
 
   }
+  else if(participate_initiated == 1){
+    if(verify_name(command)){
+      create_email(command);
+      send_email();
+      strcpy(command,"Request sent. Check your email to see details");
+    }
+    else{
+      strcpy(command,"Doesn't exist");
+    }
+    
+    participate_initiated = 0 ;
+  }
   else{ // nu recunoaste nicio comanda
       printf("Unknown command\n");
       strcpy(command,"Unknown command, try again\n");
@@ -282,16 +376,11 @@ void raspunde(void *arg)
     //raspundem pe cazuri
     case_answer(tdL.idThread,command);
 
-	  printf("[Thread %d] Trimitem mesajul inapoi...%s\n",tdL.idThread, command);
-
 	  if (write (tdL.cl, &command, sizeof(command)) <= 0)
 		  {
 		  printf("[Thread %d] ",tdL.idThread);
 		  printf("[Thread] Eroare la write() catre client.\n");
 		  }
-	  // else {
-    //    printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);
-    // }	
 
     if(strstr(command,"Goodbye")!=NULL){
       break; // iesim din while pentru acest client
