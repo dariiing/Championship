@@ -131,22 +131,10 @@ size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
   fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T " bytes from file\n", nread);
   return retcode;
 }
-void case_answer(int idThread,char command[]){
 
-  if(strstr(command,"show championships")!= NULL && login == 1){
-    printf("Showing championships\n");
-    show_championships();
-    strcpy(command,"The list of championships\n");
-  }
-  else if(strstr(command,"show championships")!= NULL && login== 0){
-    printf("Not logged in\n");
-    strcpy(command,"Please login first");
-  }
-  else if(strstr(command,"participate")!= NULL && normal == 0){
-    printf("Not logged in\n");
-    strcpy(command,"You're on admin mode\n");
-  }
-  else if(strstr(command,"participate")!= NULL && normal == 1){
+
+void send_email ()
+{
     printf("Request for participation\n");
     CURL *curl;
     CURLcode res;
@@ -180,6 +168,24 @@ void case_answer(int idThread,char command[]){
     curl_easy_cleanup(curl);
     fclose(fp);
   }
+}
+void case_answer(int idThread,char command[]){
+
+  if(strstr(command,"show championships")!= NULL && login == 1){
+    printf("Showing championships\n");
+    show_championships();
+    strcpy(command,"The list of championships\n");
+  }
+  else if(strstr(command,"show championships")!= NULL && login== 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login first");
+  }
+  else if(strstr(command,"participate")!= NULL && normal == 0){
+    printf("Not logged in\n");
+    strcpy(command,"You're on admin mode\n");
+  }
+  else if(strstr(command,"participate")!= NULL && normal == 1){
+    send_email();
     strcpy(command,"Request sent. Check your email to see details");
   }
   else if(strstr(command,"reschedule")!= NULL && normal == 0){

@@ -58,7 +58,7 @@ int main ()
     }
 
   while(1){
-  printf ("Enter your command: ");
+  printf ("CLIENT:\t");
   fflush (stdout);
   read (0, command, sizeof(command));
   //printf("[client] Am citit %s\n",command);
@@ -75,7 +75,7 @@ int main ()
     }
 
   //verificam ce a trimis serverul
-  printf ("From server: %s\n", command);
+  printf ("SERVER:\t%s\n", command);
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
       read_file(command);
   }

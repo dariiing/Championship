@@ -1,0 +1,34 @@
+
+
+CHAMPIONSHIPS DETAILS                   
+----------------------------------------
+Name: International Chess
+Type: chess
+Nb of players: 2
+Structure: one round
+Date: 2/2/27
+----------------------------------------
+Name: National Chess
+Type: chess
+Nb of players: 4
+Structure: three rounds
+Date: 4/4/23
+----------------------------------------
+Name: Tennis for teams
+Type: tennis
+Nb of players: 4
+Structure: 1 round
+Date: 23/5/24
+----------------------------------------
+Name: Tennis
+Type: tennis
+Nb of players: 2
+Structure: 1 round
+Date: 15/3/23
+----------------------------------------
+Name: Football
+Type: football
+Nb of players: 2
+Structure: 5 rounds
+Date: 12/12/25
+----------------------------------------
