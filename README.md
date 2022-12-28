@@ -7,3 +7,6 @@ Comenzi:
  ./baze
  make
  ./client
+
+ For emailing you'll need to install on your local device:
+ sudo apt-get install libcurl4-nss-dev

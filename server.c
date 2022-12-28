@@ -8,11 +8,13 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
-#include <sqlite3.h>
+#include <sqlite3.h>   // baza de date
+#include <curl/curl.h> // pentru email
 
 //variabile globale
 int login = 0;   //pt logare
 int login_initiated = 0;
+int create_initiated = 0;
 int normal = 0; //clienti normali
 int admin = 0; //admini
 sqlite3 *db;
@@ -120,6 +122,15 @@ void delete_file()
       printf("Already deleted\n");
 }
 
+size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+  FILE *readhere = (FILE *)userdata;
+  curl_off_t nread;
+  size_t retcode = fread(ptr, size, nmemb, readhere);
+  nread = (curl_off_t)retcode;
+  fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T " bytes from file\n", nread);
+  return retcode;
+}
 void case_answer(int idThread,char command[]){
 
   if(strstr(command,"show championships")!= NULL && login == 1){
@@ -133,10 +144,42 @@ void case_answer(int idThread,char command[]){
   }
   else if(strstr(command,"participate")!= NULL && normal == 0){
     printf("Not logged in\n");
-    strcpy(command,"Please login first");
+    strcpy(command,"You're on admin mode\n");
   }
   else if(strstr(command,"participate")!= NULL && normal == 1){
     printf("Request for participation\n");
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+    if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "smtp.mail.yahoo.com");  
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "dariae9@yahoo.com");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "uldnkvnyfaomrukj");
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "dariae9@yahoo.com");
+    struct curl_slist *recipients = NULL;
+    recipients = curl_slist_append(recipients, "dariae9@yahoo.com");
+    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+    
+    
+    show_championships();
+    FILE *fp = fopen("championships.txt", "rb");
+    
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)fp);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+    
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK)
+          fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
+    else printf("Email sent\n");
+    
+    curl_slist_free_all(recipients);
+    curl_easy_cleanup(curl);
+    fclose(fp);
+  }
     strcpy(command,"Request sent. Check your email to see details");
   }
   else if(strstr(command,"reschedule")!= NULL && normal == 0){
@@ -153,7 +196,8 @@ void case_answer(int idThread,char command[]){
   }
   else if(strstr(command,"create")!= NULL && admin == 1){
     printf("Created\n");
-    strcpy(command,"Championship created");
+    create_initiated = 1;
+    strcpy(command,"Write the details");
   }
   else if(strstr(command,"edit")!= NULL && admin == 1){
     printf("Edited\n");
@@ -202,6 +246,9 @@ void case_answer(int idThread,char command[]){
   else if (login_initiated == 1){ // cauta username-ul
      search_username(command);
   }
+  else if(create_initiated == 1){
+
+  }
   else{ // nu recunoaste nicio comanda
       printf("Unknown command\n");
       strcpy(command,"Unknown command, try again\n");
@@ -224,8 +271,7 @@ void raspunde(void *arg)
 			    printf ("Eroare la read() de la client.\n");
 			
 			  }
-	
-  	printf ("[Thread %d] Mesajul a fost receptionat...%s\n",tdL.idThread, command);	      
+	    
     
     //raspundem pe cazuri
     case_answer(tdL.idThread,command);
@@ -237,9 +283,9 @@ void raspunde(void *arg)
 		  printf("[Thread %d] ",tdL.idThread);
 		  printf("[Thread] Eroare la write() catre client.\n");
 		  }
-	  else {
-       printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);
-    }	
+	  // else {
+    //    printf ("[Thread %d] Mesajul a fost trasmis cu succes.\n",tdL.idThread);
+    // }	
 
     if(strstr(command,"Goodbye")!=NULL){
       break; // iesim din while pentru acest client

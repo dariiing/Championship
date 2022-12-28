@@ -33,7 +33,8 @@ int main(int argc, char* argv[]) {
       "USERNAME CHAR(10) NOT NULL,"\
       "NAME TEXT NOT NULL,"\
       "ADMIN INT NOT NULL,"\
-      "ID CHAR(4) PRIMARY KEY NOT NULL);";
+      "ID CHAR(4) PRIMARY KEY NOT NULL,"\
+      "EMAIL TEXT NOT NULL);";
 
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
@@ -61,16 +62,16 @@ int main(int argc, char* argv[]) {
       printf("Table created successfully\n");
    }
 
-   sql = "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
-         "VALUES ('daria', 'Daria', 1, 1); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
-         "VALUES ('paul', 'Paul', 0, 2); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME, ADMIN, ID) "  \
-         "VALUES ('andreea', 'Andreea', 1, 3); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
-         "VALUES ('stefan', 'Stefan', 0, 4); " \
-         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID) "  \
-         "VALUES ('mihai', 'Mihai', 1, 5); " \
+   sql = "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID, EMAIL) "  \
+         "VALUES ('daria', 'Daria', 1, 1, 'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID, EMAIL) "  \
+         "VALUES ('paul', 'Paul', 0, 2, 'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME, ADMIN, ID, EMAIL) "  \
+         "VALUES ('andreea', 'Andreea', 1, 3, 'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID, EMAIL) "  \
+         "VALUES ('stefan', 'Stefan', 0, 4, 'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME, NAME,ADMIN, ID, EMAIL) "  \
+         "VALUES ('mihai', 'Mihai', 1, 5, 'dariae9@yahoo.com'); " \
          "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,GAMES) "  \
          "VALUES ('International Chess', 'chess', 2, 'one round','12/4/15, 17/7/20', '2/2/27'); " \
         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,GAMES) "  \
