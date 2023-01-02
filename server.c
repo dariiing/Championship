@@ -17,6 +17,7 @@
 int login_initiated = 0;
 int create_initiated = 0;
 int participate_initiated = 0;
+int editing_initiated = 0;
 //int normal = 0; //clienti normali
 //int admin = 0; //admini
 sqlite3 *db;
@@ -284,26 +285,27 @@ void case_answer(int idThread,char command[]){
     participate_initiated = 1;
     strcpy(command,"Write the name of the championship");
   }
-  else if(strstr(command,"reschedule")!= NULL && v[idThread].normal == 0){
+  else if(strstr(command,"reschedule championship")!= NULL && v[idThread].normal == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login first");
   }
-  else if(strstr(command,"reschedule")!= NULL && v[idThread].normal == 0){
+  else if(strstr(command,"reschedule championship")!= NULL && v[idThread].normal == 1){
     printf("Reschedule options\n");
     strcpy(command,"Rescheduling");
   }
-  else if(strstr(command,"create")!= NULL && v[idThread].admin == 0){
+  else if(strstr(command,"create championship")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
   }
-  else if(strstr(command,"create")!= NULL && v[idThread].admin == 1){
+  else if(strstr(command,"create championship")!= NULL && v[idThread].admin == 1){
     printf("Created\n");
     create_initiated = 1;
     strcpy(command,"Write the details");
   }
   else if(strstr(command,"edit")!= NULL && v[idThread].admin == 1){
     printf("Edited\n");
-    strcpy(command,"Edited details");
+    strcpy(command,"Write the name of the championship");
+    editing_initiated = 1;
   }
   else if(strstr(command,"edit")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
@@ -347,8 +349,16 @@ void case_answer(int idThread,char command[]){
   else if (login_initiated == 1){ // cauta username-ul
      search_username(idThread, command);
   }
-  else if(create_initiated == 1){
-
+  else if(editing_initiated == 1){
+      char nume[200];
+      strcpy(nume,command);
+      if(verify_name(nume)==1){
+        strcpy(command,"Editing begins");
+      }
+      else {
+        strcpy(command,"This championship doesn't exist");
+      }
+      editing_initiated = 0;
   }
   else if(participate_initiated == 1){
     if(verify_name(command)){

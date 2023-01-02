@@ -90,6 +90,7 @@ void read_file(char command[])
   fclose(fp);
 }
 
+int editing_client = 0;
 int main ()
 {
   int sd;			                // descriptorul de socket
@@ -127,6 +128,11 @@ int main ()
   printf ("CLIENT:\t");
   fflush (stdout);
   read (0, command, sizeof(command));
+
+  char nume_edit[200];
+  if(editing_client == 1){
+      strcpy(nume_edit, command);
+  }
   //printf("[client] Am citit %s\n",command);
   if (write (sd,&command,sizeof(command)) <= 0)
     {
@@ -139,7 +145,6 @@ int main ()
       printf ("[client]Eroare la read() de la server.\n");
       exit(1);
     }
-
   //verificam ce a trimis serverul
   printf ("SERVER:\t%s\n", command);
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
@@ -147,6 +152,14 @@ int main ()
   }
   else if(strstr(command,"Write the details")!=NULL){
     insert_championship();
+  }
+  else if(strstr(command,"Write the name of the championship")!=NULL){
+    printf("alooo?\n");
+    editing_client = 1;
+  }
+  else if(strstr(command,"Editing begins")!=NULL){
+    editing_client = 0;
+    printf("For %s\n",nume_edit);
   }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
