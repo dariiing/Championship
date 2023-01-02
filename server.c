@@ -13,12 +13,12 @@
 
 
 //variabile globale
-int login = 0;   //pt logare
+//int login = 0;   //pt logare
 int login_initiated = 0;
 int create_initiated = 0;
 int participate_initiated = 0;
-int normal = 0; //clienti normali
-int admin = 0; //admini
+//int normal = 0; //clienti normali
+//int admin = 0; //admini
 sqlite3 *db;
 int rc;
 char *zErrMsg = 0;
@@ -31,13 +31,22 @@ typedef struct thData{
 	int cl; //descriptorul intors de accept
 }thData;
 
-void search_username(char command[])
+struct infos{
+  int login;
+  int normal;
+  int admin;
+}v[1000];
+
+void search_username(int idThread, char command[])
 {
       const char *user;
       const char *st;
       const char *we;
       const char *type;
       sqlite3_stmt *stmt;
+      v[idThread].login = 0;
+      v[idThread].normal = 0;
+      v[idThread].admin = 0;
       sqlite3_prepare_v2(db,"select username, strong, weak, admin from accounts",-1,&stmt,0);
       while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
@@ -47,7 +56,7 @@ void search_username(char command[])
 		      {
             strcpy(username,command);
             username[strlen(username)-1]='\0';
-            printf("%s found\n",username);
+            printf("Nb: %d -> %s found\n",idThread,username);
 
             st=sqlite3_column_text(stmt,1);
             we=sqlite3_column_text(stmt,2);
@@ -55,17 +64,20 @@ void search_username(char command[])
             strcpy(weak,we);
             printf("%s found\n",strong);
             printf("%s found\n",weak);
-            login = 1;
+            v[idThread].login = 1;
             strcpy(command,"Welcome back\n");
             //se verifica tipul de utilizator
             type = (const char *)sqlite3_column_text(stmt, 3);
             int x = atoi(type);
-            if(x == 1) admin = 1;
-            else normal = 1;
+            if(x == 1) { v[idThread].admin = 1; v[idThread].normal = 0; }
+            else {v[idThread].normal = 1; v[idThread].admin = 0;}
           }
         sqlite3_close(db);
 	    }
-      if(login == 0) { 
+      printf("Login %d\n",v[idThread].login);
+      printf("Admin %d\n",v[idThread].admin);
+      printf("Normal %d\n",v[idThread].normal);
+      if(v[idThread].login == 0) { 
         strcpy(command,"Username not found. Try again\n");
       }
       login_initiated = 0;
@@ -232,8 +244,6 @@ void send_email ()
     recipients = curl_slist_append(recipients, "dariae9@yahoo.com");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
     
-    
-    //show_championships();
     FILE *fp = fopen("email.txt", "rb");
     
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -253,54 +263,54 @@ void send_email ()
 
 void case_answer(int idThread,char command[]){
 
-  if(strstr(command,"show championships")!= NULL && login == 1){
+  if(strstr(command,"show championships")!= NULL &&  v[idThread].login == 1){
     printf("Showing championships\n");
     show_championships();
     strcpy(command,"The list of championships\n");
   }
-  else if(strstr(command,"show championships")!= NULL && login== 0){
+  else if(strstr(command,"show championships")!= NULL &&v[idThread].login == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login first");
   }
-  else if(strstr(command,"participate")!= NULL && normal == 0){
+  else if(strstr(command,"participate")!= NULL && v[idThread].admin == 1){
     printf("Admin mode\n");
     strcpy(command,"You're on admin mode\n");
   }
-  else if(strstr(command,"participate")!= NULL && normal == 1){
+  else if(strstr(command,"participate")!= NULL && v[idThread].normal == 1){
     participate_initiated = 1;
     strcpy(command,"Write the name of the championship");
   }
-  else if(strstr(command,"reschedule")!= NULL && normal == 0){
+  else if(strstr(command,"reschedule")!= NULL && v[idThread].normal == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login first");
   }
-  else if(strstr(command,"reschedule")!= NULL && normal == 1){
+  else if(strstr(command,"reschedule")!= NULL && v[idThread].normal == 0){
     printf("Reschedule options\n");
     strcpy(command,"Rescheduling");
   }
-  else if(strstr(command,"create")!= NULL && admin == 0){
+  else if(strstr(command,"create")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
   }
-  else if(strstr(command,"create")!= NULL && admin == 1){
+  else if(strstr(command,"create")!= NULL && v[idThread].admin == 1){
     printf("Created\n");
     create_initiated = 1;
     strcpy(command,"Write the details");
   }
-  else if(strstr(command,"edit")!= NULL && admin == 1){
+  else if(strstr(command,"edit")!= NULL && v[idThread].admin == 1){
     printf("Edited\n");
     strcpy(command,"Edited details");
   }
-  else if(strstr(command,"edit")!= NULL && admin == 0){
+  else if(strstr(command,"edit")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
   }
-  else if(strstr(command,"history")!= NULL && admin == 1){
+  else if(strstr(command,"history")!= NULL && v[idThread].admin == 1){
     printf("History\n");
     show_history();
     strcpy(command,"History");
   }
-  else if(strstr(command,"history")!= NULL && admin == 0){
+  else if(strstr(command,"history")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
   }
@@ -309,30 +319,29 @@ void case_answer(int idThread,char command[]){
       strcpy(command,"Goodbye"); 
       delete_file();
     }
-	else if( strstr(command,"login")!=NULL && login == 0){
+	else if( strstr(command,"login")!=NULL && v[idThread].login == 0){
       printf("Login initiated\n");
       strcpy(command,"Write your username");
       login_initiated = 1;
     }
-  else if(strstr(command,"login")!=NULL && login == 1){
+  else if(strstr(command,"login")!=NULL && v[idThread].login == 1){
       printf("Already logged\n");
       strcpy(command,"Already logged in\n");
     }
-  else if(strstr(command,"logout")!=NULL && login == 1){
+  else if(strstr(command,"logout")!=NULL && v[idThread].login == 1){
       printf("Logout succesfully\n");
-      login = 0;
-      admin = 0;
-      normal = 0;
+      v[idThread].login = 0;
+      v[idThread].admin = 0;
+      v[idThread].normal = 0;
       delete_file();
       strcpy(command,"Logged out\n");
     }
-  else if(strstr(command,"logout")!=NULL && login == 0){
+  else if(strstr(command,"logout")!=NULL && v[idThread].login == 0){
       printf("Logout failed\n");
-      login = 0;
       strcpy(command,"Not logged in\n");
     }
   else if (login_initiated == 1){ // cauta username-ul
-     search_username(command);
+     search_username(idThread, command);
   }
   else if(create_initiated == 1){
 
