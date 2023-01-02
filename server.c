@@ -56,14 +56,14 @@ void search_username(int idThread, char command[])
 		      {
             strcpy(username,command);
             username[strlen(username)-1]='\0';
-            printf("Nb: %d -> %s found\n",idThread,username);
+            printf("Client: %d -> %s found\n",idThread,username);
 
             st=sqlite3_column_text(stmt,1);
             we=sqlite3_column_text(stmt,2);
             strcpy(strong,st);
             strcpy(weak,we);
-            printf("%s found\n",strong);
-            printf("%s found\n",weak);
+            printf("Client: %d -> %s found\n",idThread,strong);
+            printf("Client: %d -> %s found\n",idThread,weak);
             v[idThread].login = 1;
             strcpy(command,"Welcome back\n");
             //se verifica tipul de utilizator
@@ -74,9 +74,9 @@ void search_username(int idThread, char command[])
           }
         sqlite3_close(db);
 	    }
-      printf("Login %d\n",v[idThread].login);
-      printf("Admin %d\n",v[idThread].admin);
-      printf("Normal %d\n",v[idThread].normal);
+      printf("Client: %d -> Login %d\n", idThread, v[idThread].login);
+      printf("Client: %d -> Admin %d\n",idThread, v[idThread].admin);
+      printf("Client: %d -> Normal %d\n",idThread, v[idThread].normal);
       if(v[idThread].login == 0) { 
         strcpy(command,"Username not found. Try again\n");
       }
@@ -258,6 +258,10 @@ void send_email ()
     curl_slist_free_all(recipients);
     curl_easy_cleanup(curl);
     fclose(fp);
+    if (remove("email.txt") == 0)
+      printf("Deleted successfully\n");
+     else
+      printf("Already deleted\n");
   }
 }
 
