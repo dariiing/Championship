@@ -419,10 +419,10 @@ int main ()
 {
   struct sockaddr_in server;	// structura folosita de server
   struct sockaddr_in cli;	    //structura folosita de client
-  int nr;		//mesajul primit de trimis la client 
-  int sd;		//descriptorul de socket 
+  int nr;		                  //mesajul primit de trimis la client 
+  int sd;		                  //descriptorul de socket 
   int pid;
-  pthread_t th[100];    //Identificatorii thread-urilor care se vor crea
+  pthread_t th[100];          //Identificatorii thread-urilor care se vor crea
   int i=0;
   
   /* crearea unui socket */

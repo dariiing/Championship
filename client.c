@@ -14,6 +14,65 @@ int port = 2009;
 sqlite3 *db;
 char *zErrMsg = 0;
 
+void insert_championship(){
+  char sql[4000];
+    printf("Name: ");
+    fflush (stdout);
+    char name[200];
+    memset(name, 0, sizeof(name));
+    read (0, name, sizeof(name));
+    name[strlen(name)-1]= '\0';
+    
+    printf("Type: ");
+    fflush (stdout);
+    char type[200];
+    memset(type, 0, sizeof(type));
+    read (0, type, sizeof(type));
+    type[strlen(type)-1]= '\0';
+    
+    printf("Structure: ");
+    fflush (stdout);
+    char structure[200];
+    memset(structure, 0, sizeof(structure));
+    read (0, structure, sizeof(structure));
+    structure[strlen(structure)-1]= '\0';
+    
+    printf("Last played: ");
+    fflush (stdout);
+    char history[200];
+    memset(history, 0, sizeof(history));
+    read (0, history, sizeof(history));
+    history[strlen(history)-1]= '\0';
+
+    printf("Last Winner: ");
+    fflush (stdout);
+    char winner[200];
+    memset(winner, 0, sizeof(winner));
+    read (0, winner, sizeof(winner));
+    winner[strlen(winner)-1]= '\0';
+
+    printf("Date: ");
+    fflush (stdout);
+    char date[200];
+    memset(date, 0, sizeof(date));
+    read (0, date, sizeof(date));
+    date[strlen(date)-1]= '\0';
+
+    printf("Number of players: ");
+    fflush (stdout);
+    int nr;
+    read (0, (void*)&nr, 2);
+
+    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,STRUCTURE,HISTORY,WINNER, GAMES,NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s',%d);",name, type,date,structure,history, winner,nr);
+    printf("%s\n",sql);
+    int rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+    if( rc != SQLITE_OK ){
+      printf("SQL error: %s\n", zErrMsg);
+   } else {
+      printf("Records created successfully\n");
+   }
+}
+
 void read_file(char command[])
 {
   FILE *fp;
@@ -58,6 +117,13 @@ int main ()
     }
 
   while(1){
+  
+  int rc = sqlite3_open("test.db", &db);
+  if(rc){
+    printf("Can't open database: %s\n", sqlite3_errmsg(db));
+    exit(1);
+  }
+  
   printf ("CLIENT:\t");
   fflush (stdout);
   read (0, command, sizeof(command));
@@ -80,59 +146,7 @@ int main ()
       read_file(command);
   }
   else if(strstr(command,"Write the details")!=NULL){
-    char sql[400] = "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES) VALUES ('";
-    sqlite3_stmt *stmt;
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,command);//nume
-    strcat(sql,"'");
-    strcat(sql,",");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,"'");
-    strcat(sql,command); //tip
-    strcat(sql,"'");
-    strcat(sql,",");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,command);//nb
-    strcat(sql,",");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,"'");
-    strcat(sql,command);//struct
-    strcat(sql,"'");
-    strcat(sql,",");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,"'");
-    strcat(sql,command);//history
-    strcat(sql,"'");
-    strcat(sql,",");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,"'");
-    strcat(sql,command);//WINNER
-    strcat(sql,"',");
-    memset(command, 0, sizeof(command));
-    read (0, command, sizeof(command));
-    command[strlen(command)-1]='\0';
-    strcat(sql,"'");
-    strcat(sql,command);//games
-    strcat(sql,"');");
-    printf("%s\n",sql);
-    int rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
-    if( rc != SQLITE_OK ){
-      printf("SQL error: %s\n", zErrMsg);
-   } else {
-      printf("Records created successfully\n");
-   }
+    insert_championship();
   }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
@@ -140,5 +154,5 @@ int main ()
   }
   memset(command, 0, sizeof(command));
   }
-  
+  sqlite3_close(db);
 }
