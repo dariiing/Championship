@@ -54,7 +54,9 @@ int main(int argc, char* argv[]) {
       "STRUCTURE TEXT NOT NULL,"\
       "HISTORY TEXT,"\
       "WINNER TEXT,"\
-      "GAMES DATE);";
+      "GAMES DATE,"\
+      "ORA TEXT,"\
+      "DESC TEXT);";
 
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
@@ -75,16 +77,17 @@ int main(int argc, char* argv[]) {
          "VALUES ('stefan','stefan', 'Stefan', 0,'chess', 'football', 4, 'dariae9@yahoo.com'); " \
          "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, NAME,ADMIN,STRONG, WEAK, ID, EMAIL) "  \
          "VALUES ('mihai', 'mihai', 'Mihai', 1,'tennis','chess' ,5, 'dariae9@yahoo.com'); " \
-         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES) "  \
-         "VALUES ('International Chess', 'chess', 2, 'one round','12/4/15, 17/7/20','Andrei', '2/2/27'); " \
-         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY, WINNER, GAMES) "  \
-         "VALUES ('National Chess', 'chess', 4, 'three rounds', '12/4/17, 7/3/20','Monica', '4/4/23'); "
-         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES) "  \
-         "VALUES ('Tennis for teams', 'tennis', 4, '1 round','12/12/19','Team Australia', '23/5/24'); "
-         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY, WINNER, GAMES) "  \
-         "VALUES ('Tennis', 'tennis', 2, '1 round','none','none', '15/3/23'); "
-         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE, HISTORY, WINNER, GAMES) "  \
-         "VALUES ('Football', 'football', 2, '5 rounds', '12/12/13' , 'Team Denmark', '12/12/25'); " ;
+         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES, ORA, DESC) "  \
+         "VALUES ('International Chess', 'chess', 2, 'one round','12/4/15, 17/7/20','Andrei', '2/2/27','12:00','Chess is an abstract strategy game and involves no hidden information. This championship requires experience'); " \
+         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY, WINNER, GAMES, ORA, DESC) "  \
+         "VALUES ('National Chess', 'chess', 4, 'three rounds', '12/4/17, 7/3/20','Monica', '4/4/23','10:00','Chess is an abstract strategy game and involves no hidden information. This championship requires experience'); " \
+         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY,WINNER, GAMES, ORA, DESC) "  \
+         "VALUES ('Tennis for teams', 'tennis', 4, '1 round','12/12/19','Team Australia', '23/5/24', '13:00','Tennis is a racket sport that can be played individually against a single opponent: singles '); " \
+         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE,HISTORY, WINNER, GAMES, ORA, DESC) "  \
+         "VALUES ('Tennis', 'tennis', 2, '1 round','none','none', '15/3/23','16:00','Tennis is a racket sport that can be played between two teams of two players each : doubles '); " \
+         "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,NB_PLAYERS,STRUCTURE, HISTORY, WINNER, GAMES, ORA, DESC) "  \
+         "VALUES ('Football', 'football', 2, '5 rounds', '12/12/13' , 'Team Denmark', '12/12/25', '20:00','Football is a game involving two teams of 11 players who try to maneuver the ball into goal without using their hands or arms ' ); " ;
+         
 
    /* Execute SQL statement */
    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);

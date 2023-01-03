@@ -65,12 +65,19 @@ void insert_championship(){
     read (0, date, sizeof(date));
     date[strlen(date)-1]= '\0';
 
+    printf("Hour: ");
+    fflush (stdout);
+    char ora[200];
+    memset(ora, 0, sizeof(ora));
+    read (0, ora, sizeof(ora));
+    date[strlen(date)-1]= '\0';
+
     printf("Number of players: ");
     fflush (stdout);
     int nr;
     read (0, (void*)&nr, 2);
 
-    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES, NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s',%d);", name, type, structure, history, winner, date, nr);
+    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA, NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s','%s', %d);", name, type, structure, history, winner, date, ora, nr);
     printf("%s\n",sql);
     rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
     if( rc != SQLITE_OK ){

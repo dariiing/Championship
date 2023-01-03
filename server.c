@@ -39,6 +39,8 @@ struct infos{
   int admin;
 }v[1000];
 
+pthread_mutex_t lock;
+
 int search_username(int idThread, char command[])
 {
       const char *user;
@@ -121,8 +123,9 @@ void show_championships()
   const char *nb;
   const char *structure;
   const char *date;
+  const char *ora;
   sqlite3_stmt *stmt;
-  sqlite3_prepare_v2(db,"select name, type, nb_players, structure, games  from championships",-1,&stmt,0);
+  sqlite3_prepare_v2(db,"select name, type, nb_players, structure, games,ora  from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    { 
         name=sqlite3_column_text(stmt,0);
@@ -135,6 +138,8 @@ void show_championships()
         fprintf(fp,"Structure: %s\n", structure);
         date=sqlite3_column_text(stmt,4);
         fprintf(fp,"Date: %s\n", date);
+        ora=sqlite3_column_text(stmt,5);
+        fprintf(fp,"Hour: %s\n", ora);
         fprintf(fp,"----------------------------------------\n");
         sqlite3_close(db);
 	    }
@@ -218,8 +223,9 @@ void create_email(char command[])
   const char *nb;
   const char *structure;
   const char *date;
-  
-  sqlite3_prepare_v2(db,"select name, type,nb_players, structure, games from championships",-1,&stmt,0);
+  const char *ora;
+  const char *desc;  
+  sqlite3_prepare_v2(db,"select name, type,nb_players, structure, games, ora,desc from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    name=sqlite3_column_text(stmt,0);
@@ -238,6 +244,10 @@ void create_email(char command[])
             fprintf(fp, "Structure: %s\n", structure);
             date=sqlite3_column_text(stmt,4);
             fprintf(fp, "Date: %s\n", date);
+            ora=sqlite3_column_text(stmt,5);
+            fprintf(fp, "Hour: %s\n", ora);
+            desc=sqlite3_column_text(stmt,6);
+            fprintf(fp, "Short description: %s\n", desc);
             fprintf(fp,"----------------------------------------\n");
             fprintf(fp, "Good luck!\n");
             }
@@ -393,6 +403,7 @@ void case_answer(int idThread,char command[]){
       editing_initiated = 0;
   }
   else if(participate_initiated == 1){
+    pthread_mutex_lock(&lock);
     if(verify_name(command)){
       create_email(command);
       send_email();
@@ -401,7 +412,7 @@ void case_answer(int idThread,char command[]){
     else{
       strcpy(command,"Doesn't exist");
     }
-    
+    pthread_mutex_unlock(&lock);
     participate_initiated = 0 ;
   }
   else{ // nu recunoaste nicio comanda

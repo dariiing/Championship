@@ -1,0 +1,24 @@
+
+
+CHAMPIONSHIPS HISTORY                   
+----------------------------------------
+Name: International Chess
+History: 12/4/15, 17/7/20
+Last winner: Andrei
+----------------------------------------
+Name: National Chess
+History: 12/4/17, 7/3/20
+Last winner: Monica
+----------------------------------------
+Name: Tennis for teams
+History: 12/12/19
+Last winner: Team Australia
+----------------------------------------
+Name: Tennis
+History: none
+Last winner: none
+----------------------------------------
+Name: Football
+History: 12/12/13
+Last winner: Team Denmark
+----------------------------------------
