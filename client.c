@@ -115,13 +115,143 @@ void update_championship(int editing_client, char command[],char nume_edit[]){
       exit(1);
     }
     printf("For %s\n",nume_edit);
-    printf("If you don't want to edit, write 'none' .\n Type edit:");
+    
+    printf("If you don't want to edit, write 'none' .\n Name edit:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET NAME = '%s' WHERE NAME = '%s';", command, nume_edit);
+        strcpy(nume_edit, command);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+
+    printf("Type:");
     fflush (stdout);
     memset(command, 0, 200);
     read (0, command, 200);
     command[strlen(command)-1]='\0';
     if(strstr(command,"none")==NULL){
         sprintf(sql, "UPDATE CHAMPIONSHIPS SET TYPE = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+
+    printf("Number of players:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET NB_PLAYERS = %s WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+    
+    printf("Structure:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET STRUCTURE = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+    
+    printf("History:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET HISTORY = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+    
+    printf("Last winner:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET WINNER = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+
+   printf("Date:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET GAMES = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+    
+    printf("Hour:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET ORA = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+   
+   printf("Short description:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET DESC = '%s' WHERE NAME = '%s';", command, nume_edit);
         printf("%s\n",sql);
         rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
         if( rc != SQLITE_OK ){
