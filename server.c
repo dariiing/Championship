@@ -18,6 +18,7 @@ int login_initiated = 0;
 int create_initiated = 0;
 int participate_initiated = 0;
 int editing_initiated = 0;
+int pass_initiated = 0;
 //int normal = 0; //clienti normali
 //int admin = 0; //admini
 sqlite3 *db;
@@ -38,17 +39,11 @@ struct infos{
   int admin;
 }v[1000];
 
-void search_username(int idThread, char command[])
+int search_username(int idThread, char command[])
 {
       const char *user;
-      const char *st;
-      const char *we;
-      const char *type;
       sqlite3_stmt *stmt;
-      v[idThread].login = 0;
-      v[idThread].normal = 0;
-      v[idThread].admin = 0;
-      sqlite3_prepare_v2(db,"select username, strong, weak, admin from accounts",-1,&stmt,0);
+      sqlite3_prepare_v2(db,"select username from accounts",-1,&stmt,0);
       while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    user=sqlite3_column_text(stmt,0);
@@ -57,6 +52,37 @@ void search_username(int idThread, char command[])
 		      {
             strcpy(username,command);
             username[strlen(username)-1]='\0';
+            printf("Client: %d -> %s found\n",idThread,username);
+            strcpy(command,"User found. Enter your password\n");
+            return 1;
+          }
+        sqlite3_close(db);
+	    }
+      strcpy(command,"Username not found. Try again\n");
+      return 0;
+}
+
+void search_password(int idThread, char command[])
+{
+      const char *pass;
+      const char *st;
+      const char *we;
+      const char *type;
+      sqlite3_stmt *stmt;
+      v[idThread].login = 0;
+      v[idThread].normal = 0;
+      v[idThread].admin = 0;
+      char sql[4000];
+      printf("buna siua %s\n",username);
+      sprintf(sql,"select password, strong, weak, admin from accounts where username = '%s'",username);
+      sqlite3_prepare_v2(db,sql,-1,&stmt,0);
+      while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    {
+		    pass=sqlite3_column_text(stmt,0);
+        printf("Verifying the password\n");
+		    if(strstr(command,pass)!=0) 
+		      {
+            printf("Corect password\n");
             printf("Client: %d -> %s found\n",idThread,username);
 
             st=sqlite3_column_text(stmt,1);
@@ -79,9 +105,8 @@ void search_username(int idThread, char command[])
       printf("Client: %d -> Admin %d\n",idThread, v[idThread].admin);
       printf("Client: %d -> Normal %d\n",idThread, v[idThread].normal);
       if(v[idThread].login == 0) { 
-        strcpy(command,"Username not found. Try again\n");
+        strcpy(command,"Wrong password. Try again\n");
       }
-      login_initiated = 0;
 }
 
 void show_championships()
@@ -347,7 +372,14 @@ void case_answer(int idThread,char command[]){
       strcpy(command,"Not logged in\n");
     }
   else if (login_initiated == 1){ // cauta username-ul
-     search_username(idThread, command);
+     if(search_username(idThread, command)==1){
+        pass_initiated = 1;
+     }
+     login_initiated = 0;
+  }
+  else if(pass_initiated == 1 ){
+    pass_initiated = 0;
+    search_password(idThread, command);
   }
   else if(editing_initiated == 1){
       char nume[200];
