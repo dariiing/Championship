@@ -15,6 +15,13 @@ sqlite3 *db;
 char *zErrMsg = 0;
 
 void insert_championship(){
+
+  int rc = sqlite3_open("test.db", &db);
+  if(rc){
+    printf("Can't open database: %s\n", sqlite3_errmsg(db));
+    exit(1);
+  }
+
   char sql[4000];
     printf("Name: ");
     fflush (stdout);
@@ -63,14 +70,15 @@ void insert_championship(){
     int nr;
     read (0, (void*)&nr, 2);
 
-    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME,TYPE,STRUCTURE,HISTORY,WINNER, GAMES,NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s',%d);",name, type,date,structure,history, winner,nr);
+    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES, NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s',%d);", name, type, structure, history, winner, date, nr);
     printf("%s\n",sql);
-    int rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+    rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
     if( rc != SQLITE_OK ){
       printf("SQL error: %s\n", zErrMsg);
    } else {
       printf("Records created successfully\n");
    }
+   sqlite3_close(db);
 }
 
 void read_file(char command[])
@@ -90,6 +98,33 @@ void read_file(char command[])
   fclose(fp);
 }
 
+
+void update_championship(int editing_client, char command[],char nume_edit[]){
+    editing_client = 0;
+    char sql[4000];
+    int rc = sqlite3_open("test.db", &db);
+    if(rc){
+      printf("Can't open database: %s\n", sqlite3_errmsg(db));
+      exit(1);
+    }
+    printf("For %s\n",nume_edit);
+    printf("If you don't want to edit, write 'none' .\n Type edit:");
+    fflush (stdout);
+    memset(command, 0, 200);
+    read (0, command, 200);
+    command[strlen(command)-1]='\0';
+    if(strstr(command,"none")==NULL){
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET TYPE = '%s' WHERE NAME = '%s';", command, nume_edit);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+    }
+   sqlite3_close(db);
+}
 int editing_client = 0;
 int main ()
 {
@@ -119,12 +154,6 @@ int main ()
 
   while(1){
   
-  int rc = sqlite3_open("test.db", &db);
-  if(rc){
-    printf("Can't open database: %s\n", sqlite3_errmsg(db));
-    exit(1);
-  }
-  
   printf ("CLIENT:\t");
   fflush (stdout);
   read (0, command, sizeof(command));
@@ -132,6 +161,7 @@ int main ()
   char nume_edit[200];
   if(editing_client == 1){
       strcpy(nume_edit, command);
+      nume_edit[strlen(nume_edit)-1]='\0';
   }
   //printf("[client] Am citit %s\n",command);
   if (write (sd,&command,sizeof(command)) <= 0)
@@ -145,6 +175,7 @@ int main ()
       printf ("[client]Eroare la read() de la server.\n");
       exit(1);
     }
+    
   //verificam ce a trimis serverul
   printf ("SERVER:\t%s\n", command);
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
@@ -154,12 +185,10 @@ int main ()
     insert_championship();
   }
   else if(strstr(command,"Write the name of the championship")!=NULL){
-    printf("alooo?\n");
     editing_client = 1;
   }
   else if(strstr(command,"Editing begins")!=NULL){
-    editing_client = 0;
-    printf("For %s\n",nume_edit);
+    update_championship(editing_client, command,nume_edit);
   }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
