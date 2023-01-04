@@ -58,8 +58,10 @@ int search_username(int idThread, char command[])
             strcpy(command,"User found. Enter your password\n");
             return 1;
           }
-        sqlite3_close(db);
+        
 	    }
+      rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
       strcpy(command,"Username not found. Try again\n");
       return 0;
 }
@@ -101,8 +103,9 @@ void search_password(int idThread, char command[])
             if(x == 1) { v[idThread].admin = 1; v[idThread].normal = 0; }
             else {v[idThread].normal = 1; v[idThread].admin = 0;}
           }
-        sqlite3_close(db);
 	    }
+      rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
       printf("Client: %d -> Login %d\n", idThread, v[idThread].login);
       printf("Client: %d -> Admin %d\n",idThread, v[idThread].admin);
       printf("Client: %d -> Normal %d\n",idThread, v[idThread].normal);
@@ -141,8 +144,9 @@ void show_championships()
         ora=sqlite3_column_text(stmt,5);
         fprintf(fp,"Hour: %s\n", ora);
         fprintf(fp,"----------------------------------------\n");
-        sqlite3_close(db);
 	    }
+      rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
   fclose(fp);
 }
 
@@ -169,6 +173,8 @@ void show_history()
         fprintf(fp,"----------------------------------------\n");
         sqlite3_close(db);
 	    }
+      rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
   fclose(fp);
 }
 
@@ -208,8 +214,10 @@ int verify_name(char command[])
 		      {
             return 1;
           }
-        sqlite3_close(db);
+        //sqlite3_close(db);
 	    }
+      rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
   return 0;
 }
 
@@ -258,8 +266,10 @@ void create_email(char command[])
               fprintf(fp,"----------------------------------------\n");
             }
           }
-        sqlite3_close(db);
+        // sqlite3_close(db);
 	    }
+    rc = sqlite3_finalize(stmt);
+      sqlite3_close(db);
   fclose(fp);
 }
 void send_email ()
@@ -337,12 +347,12 @@ void case_answer(int idThread,char command[]){
     create_initiated = 1;
     strcpy(command,"Write the details");
   }
-  else if(strstr(command,"edit")!= NULL && v[idThread].admin == 1){
+  else if(strstr(command,"edit championship")!= NULL && v[idThread].admin == 1){
     printf("Edited\n");
     strcpy(command,"Write the name of the championship");
     editing_initiated = 1;
   }
-  else if(strstr(command,"edit")!= NULL && v[idThread].admin == 0){
+  else if(strstr(command,"edit championship")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
   }

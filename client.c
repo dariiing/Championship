@@ -107,8 +107,10 @@ void read_file(char command[])
 
 
 void update_championship(int editing_client, char command[],char nume_edit[]){
+    
     editing_client = 0;
     char sql[4000];
+
     int rc = sqlite3_open("test.db", &db);
     if(rc!= SQLITE_OK){
       printf("Can't open database: %s\n", sqlite3_errmsg(db));
