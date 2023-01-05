@@ -397,6 +397,20 @@ void update(char edit[], char command[], char nume[]){
   }
 }
 
+void insert(char command[]){
+  char sql[5000];
+  sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora, new_desc, new_nb);
+  printf("%s\n",sql);
+  rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+  if( rc != SQLITE_OK ){
+      printf("SQL error: %s\n", zErrMsg);
+  } else {
+      printf("Records created successfully\n");
+      strcpy(command,"Championship created");
+  }
+  sqlite3_close(db);
+}
+
 void case_answer(int idThread,char command[]){
 
   if(strstr(command,"show championships")!= NULL &&  v[idThread].login == 1){
@@ -547,17 +561,7 @@ void case_answer(int idThread,char command[]){
     command[strlen(command)-1]='\0';
     strcpy(new_nb,command);
     create_nb = 0;
-    char sql[5000];
-    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora, new_desc, new_nb);
-    printf("%s\n",sql);
-    rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
-    if( rc != SQLITE_OK ){
-        printf("SQL error: %s\n", zErrMsg);
-    } else {
-        printf("Records created successfully\n");
-        strcpy(command,"Championship created");
-    }
-    sqlite3_close(db);
+    insert(command);
   }
   else if(editing_initiated == 1){
       strcpy(nume,command); // am copiat numele campionatului pe care il editez
