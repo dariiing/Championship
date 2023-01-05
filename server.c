@@ -243,44 +243,81 @@ void create_email(char command[])
   const char *name;
   const char *type;
   const char *nb;
+  const char *nr;
   const char *structure;
   const char *date;
   const char *ora;
-  const char *desc;  
-  sqlite3_prepare_v2(db,"select name, type,nb_players, structure, games, ora,desc from championships",-1,&stmt,0);
+  const char *desc;
+  const char *part;  
+  sqlite3_prepare_v2(db,"select name, type, nb_players, nr_participanti, participanti, structure, games, ora,desc from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
-		    name=sqlite3_column_text(stmt,0);
-		    if(strstr(command,name)!=0) 
+		    name = sqlite3_column_text(stmt,0);
+        
+		    if(strstr(command,name)!=0 )  // este acceptat
 		      {
-            type=sqlite3_column_text(stmt,1);
-            if(strstr(type,weak)==0){
-            fprintf(fp, "Congratulations, %s!\n", username);
-            fprintf(fp, "You've been accepted to this championship. See details below:\n");
-            fprintf(fp,"----------------------------------------\n");
-            fprintf(fp, "Name: %s\n", name);
-            fprintf(fp, "Type: %s\n", type);
-            nb=sqlite3_column_text(stmt,2);
-            fprintf(fp, "Number of players: %s\n", nb);
-            structure=sqlite3_column_text(stmt,3);
-            fprintf(fp, "Structure: %s\n", structure);
-            date=sqlite3_column_text(stmt,4);
-            fprintf(fp, "Date: %s\n", date);
-            ora=sqlite3_column_text(stmt,5);
-            fprintf(fp, "Hour: %s\n", ora);
-            desc=sqlite3_column_text(stmt,6);
-            fprintf(fp, "Short description: %s\n", desc);
-            fprintf(fp,"----------------------------------------\n");
-            fprintf(fp, "Good luck!\n");
+            nb = sqlite3_column_text(stmt,2);
+            nr = sqlite3_column_text(stmt,3);
+            int nb_p, nr_p;
+            nb_p = atoi(nb);
+            nr_p = atoi(nr);
+            printf("nr part: %d si nr inscrisi: %d\n", nb_p, nr_p);
+
+
+            if(strstr(type,weak)==0 && nr_p < nb_p){
+              char sql[500];
+              sprintf(sql, "UPDATE CHAMPIONSHIPS SET NR_PARTICIPANTI = NR_PARTICIPANTI+1 WHERE NAME = '%s';", name);
+              printf("%s\n",sql);
+              rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+              if( rc != SQLITE_OK ){
+                  printf("SQL error: %s\n", zErrMsg);
+              } else {
+                printf("NR_PARTICIPANTI edited succesfully\n");
+              }
+              fprintf(fp, "Congratulations, %s!\n", username);
+              fprintf(fp, "You've been accepted to this championship. See details below:\n");
+              fprintf(fp,"----------------------------------------\n");
+              fprintf(fp, "Name: %s\n", name);
+              type=sqlite3_column_text(stmt,1);
+              fprintf(fp, "Type: %s\n", type);
+    
+              fprintf(fp, "Number of players: %s\n", nb);
+            
+              part=sqlite3_column_text(stmt,4);
+
+              sprintf(sql, "UPDATE CHAMPIONSHIPS SET PARTICIPANTI = '%s, %s' WHERE NAME = '%s';",part,username, name);
+              printf("%s\n",sql);
+              rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+              if( rc != SQLITE_OK ){
+                  printf("SQL error: %s\n", zErrMsg);
+              } else {
+                printf("PARTICIPANTI edited succesfully\n");
+              }
+
+            
+              fprintf(fp, "Participants: %s, %s\n", part, username);
+              structure=sqlite3_column_text(stmt,5);
+              fprintf(fp, "Structure: %s\n", structure);
+              date=sqlite3_column_text(stmt,6);
+              fprintf(fp, "Date: %s\n", date);
+              ora=sqlite3_column_text(stmt,7);
+              fprintf(fp, "Hour: %s\n", ora);
+              desc=sqlite3_column_text(stmt,8);
+              fprintf(fp, "Short description: %s\n", desc);
+              fprintf(fp,"----------------------------------------\n");
+              fprintf(fp, "Good luck!\n");
             }
             else {
               fprintf(fp, "Hello %s,\n You haven't been accepted to %s.\n",username, name);
+              if(nb_p == nr_p){
+                  fprintf(fp, "Maximum number of participants has been reached %d/%d.\n",nb_p, nr_p);
+              }
               fprintf(fp, "Try another championship, following your strong points: %s.\n", strong);
               fprintf(fp, "Good luck!\n");
               fprintf(fp,"----------------------------------------\n");
             }
           }
-	    }
+      }
     rc = sqlite3_finalize(stmt);
     sqlite3_close(db);
     fclose(fp);
@@ -334,7 +371,7 @@ void update(char edit[], char command[], char nume[]){
         if( rc != SQLITE_OK ){
             printf("SQL error: %s\n", zErrMsg);
         } else {
-            printf("Records created successfully\n");
+            printf("'%s' edited succesfully\n", edit);
         }
       sqlite3_close(db);
   }
