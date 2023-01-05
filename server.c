@@ -20,6 +20,26 @@ int participate_initiated = 0;
 int editing_initiated = 0;
 int pass_initiated = 0;
 
+//pt create
+int create_name = 0;
+int create_type = 0;
+int create_structure = 0;
+int create_history = 0;
+int create_winner = 0;
+int create_date = 0;
+int create_ora = 0;
+int create_desc = 0;
+int create_nb = 0;
+char new_name[200];
+char new_type[200];
+char new_structure[200];
+char new_history[200];
+char new_winner[200];
+char new_date[200];
+char new_ora[200];
+char new_desc[200];
+char new_nb[200];
+
 //pt update
 char nume[200];
 int hist_edit = 0;
@@ -228,7 +248,7 @@ int verify_name(char command[])
 		      {
             return 1;
           }
-        //sqlite3_close(db);
+
 	    }
       rc = sqlite3_finalize(stmt);
       sqlite3_close(db);
@@ -411,8 +431,8 @@ void case_answer(int idThread,char command[]){
     strcpy(command,"Please login as admin");
   }
   else if(strstr(command,"create championship")!= NULL && v[idThread].admin == 1){
-    create_initiated = 1;
-    strcpy(command,"Write the details");
+    create_name = 1;
+    strcpy(command,"Write the name for the new championship");
   }
   else if(strstr(command,"edit championship")!= NULL && v[idThread].admin == 1){
     strcpy(command,"Write the name of the championship");
@@ -466,6 +486,78 @@ void case_answer(int idThread,char command[]){
   else if(pass_initiated == 1 ){
     pass_initiated = 0;
     search_password(idThread, command);
+  }
+  else if(create_name==1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_name,command);
+    create_name = 0;
+    create_type = 1;
+    strcpy(command,"Write the type of the championship");
+  }
+  else if(create_type==1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_type,command);
+    create_type = 0;
+    create_structure = 1;
+    strcpy(command,"Write the structure of the championship");
+  }
+  else if(create_structure == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_structure,command);
+    create_structure = 0;
+    create_history = 1;
+    strcpy(command,"Write the history of the championship");
+  }
+  else if(create_history == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_history,command);
+    create_history = 0;
+    create_winner = 1;
+    strcpy(command,"Write the last winner of the championship");
+  }
+  else if(create_winner == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_winner,command);
+    create_winner = 0;
+    create_date = 1;
+    strcpy(command,"Write the date of the championship");
+  }
+  else if(create_date == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_date,command);
+    create_date = 0;
+    create_ora = 1;
+    strcpy(command,"Write the hour of the championship");
+  }
+  else if(create_ora == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_ora,command);
+    create_ora = 0;
+    create_desc = 1;
+    strcpy(command,"Write the description of the championship");
+  }
+  else if(create_desc == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_desc,command);
+    create_desc = 0;
+    create_nb =1;
+    strcpy(command,"Write the number of players of the championship");
+  }
+  else if(create_nb == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_nb,command);
+    create_nb = 0;
+    char sql[5000];
+    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora, new_desc, new_nb);
+    printf("%s\n",sql);
+    rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+    if( rc != SQLITE_OK ){
+        printf("SQL error: %s\n", zErrMsg);
+    } else {
+        printf("Records created successfully\n");
+        strcpy(command,"Championship created");
+    }
+    sqlite3_close(db);
   }
   else if(editing_initiated == 1){
       strcpy(nume,command); // am copiat numele campionatului pe care il editez

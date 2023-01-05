@@ -14,80 +14,6 @@ int port = 2009;
 sqlite3 *db;
 char *zErrMsg = 0;
 
-void insert_championship(){
-
-  int rc = sqlite3_open("test.db", &db);
-  if(rc){
-    printf("Can't open database: %s\n", sqlite3_errmsg(db));
-    exit(1);
-  }
-
-  char sql[4000];
-    printf("Name: ");
-    fflush (stdout);
-    char name[200];
-    memset(name, 0, sizeof(name));
-    read (0, name, sizeof(name));
-    name[strlen(name)-1]= '\0';
-    
-    printf("Type: ");
-    fflush (stdout);
-    char type[200];
-    memset(type, 0, sizeof(type));
-    read (0, type, sizeof(type));
-    type[strlen(type)-1]= '\0';
-    
-    printf("Structure: ");
-    fflush (stdout);
-    char structure[200];
-    memset(structure, 0, sizeof(structure));
-    read (0, structure, sizeof(structure));
-    structure[strlen(structure)-1]= '\0';
-    
-    printf("Last played: ");
-    fflush (stdout);
-    char history[200];
-    memset(history, 0, sizeof(history));
-    read (0, history, sizeof(history));
-    history[strlen(history)-1]= '\0';
-
-    printf("Last Winner: ");
-    fflush (stdout);
-    char winner[200];
-    memset(winner, 0, sizeof(winner));
-    read (0, winner, sizeof(winner));
-    winner[strlen(winner)-1]= '\0';
-
-    printf("Date: ");
-    fflush (stdout);
-    char date[200];
-    memset(date, 0, sizeof(date));
-    read (0, date, sizeof(date));
-    date[strlen(date)-1]= '\0';
-
-    printf("Hour: ");
-    fflush (stdout);
-    char ora[200];
-    memset(ora, 0, sizeof(ora));
-    read (0, ora, sizeof(ora));
-    date[strlen(date)-1]= '\0';
-
-    printf("Number of players: ");
-    fflush (stdout);
-    int nr;
-    read (0, (void*)&nr, 2);
-
-    sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA, NB_PLAYERS) VALUES ('%s','%s','%s','%s','%s','%s','%s', %d);", name, type, structure, history, winner, date, ora, nr);
-    printf("%s\n",sql);
-    rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
-    if( rc != SQLITE_OK ){
-      printf("SQL error: %s\n", zErrMsg);
-   } else {
-      printf("Records created successfully\n");
-   }
-   sqlite3_close(db);
-}
-
 void read_file(char command[])
 {
   FILE *fp;
@@ -105,7 +31,6 @@ void read_file(char command[])
   fclose(fp);
 }
 
-int editing_client = 0;
 int main ()
 {
   int sd;			                // descriptorul de socket
@@ -139,10 +64,6 @@ int main ()
   read (0, command, sizeof(command));
 
   char nume_edit[200];
-  if(editing_client == 1){
-      strcpy(nume_edit, command);
-      nume_edit[strlen(nume_edit)-1]='\0';
-  }
   //printf("[client] Am citit %s\n",command);
   if (write (sd,&command,sizeof(command)) <= 0)
     {
@@ -160,15 +81,6 @@ int main ()
   printf ("SERVER:\t%s\n", command);
   if(strstr(command,"The list of championships")!=NULL || strstr(command,"History")!=NULL){
       read_file(command);
-  }
-  else if(strstr(command,"Write the details")!=NULL){
-    insert_championship();
-  }
-  else if(strstr(command,"Write the name of the championship")!=NULL){
-    editing_client = 1;
-  }
-  else if(strstr(command,"Editing begins")!=NULL){
-   
   }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
