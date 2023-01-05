@@ -13,14 +13,22 @@
 
 
 //variabile globale
-//int login = 0;   //pt logare
+
 int login_initiated = 0;
 int create_initiated = 0;
 int participate_initiated = 0;
 int editing_initiated = 0;
 int pass_initiated = 0;
-//int normal = 0; //clienti normali
-//int admin = 0; //admini
+
+//pt update
+char nume[200];
+int hist_edit = 0;
+int winner_edit = 0;
+int games_edit = 0;
+int ora_edit = 0;
+int desc_edit = 0;
+
+//database
 sqlite3 *db;
 int rc;
 char *zErrMsg = 0;
@@ -162,6 +170,7 @@ void show_history()
   const char *winner;
   sqlite3_stmt *stmt;
   sqlite3_prepare_v2(db,"select name, history, winner from championships",-1,&stmt,0);
+  char namex[200]; int ok =0;
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    { 
         name=sqlite3_column_text(stmt,0);
@@ -171,9 +180,22 @@ void show_history()
         winner=sqlite3_column_text(stmt,2);
         fprintf(fp,"Last winner: %s\n", winner);
         fprintf(fp,"----------------------------------------\n");
+        if(ok==0){
+          strcpy(namex,name); ok=1;
+        }
         sqlite3_close(db);
 	    }
+      //MERGE
+      // char sql[500];
+      // sprintf(sql, "UPDATE CHAMPIONSHIPS SET DESC = 'NOdddNE' WHERE NAME = '%s';",namex);
+      // rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+      //   if( rc != SQLITE_OK ){
+      //       printf("SQL error: %s\n", zErrMsg);
+      //   } else {
+      //       printf("Records created successfully\n");
+      //   }
       rc = sqlite3_finalize(stmt);
+
       sqlite3_close(db);
   fclose(fp);
 }
@@ -311,6 +333,21 @@ void send_email ()
   }
 }
 
+void update(char edit[], char command[], char nume[]){
+  if(strstr(command,"none")==NULL){
+        command[strlen(command)-1]='\0';
+        char sql[500];
+        sprintf(sql, "UPDATE CHAMPIONSHIPS SET %s = '%s' WHERE NAME = '%s';",edit, command, nume);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("Records created successfully\n");
+        }
+      sqlite3_close(db);
+  }
+}
 void case_answer(int idThread,char command[]){
 
   if(strstr(command,"show championships")!= NULL &&  v[idThread].login == 1){
@@ -402,15 +439,57 @@ void case_answer(int idThread,char command[]){
     search_password(idThread, command);
   }
   else if(editing_initiated == 1){
-      char nume[200];
-      strcpy(nume,command);
+      strcpy(nume,command); // am copiat numele campionatului pe care il editez
+      nume[strlen(nume)-1]='\0';
+      printf("Editing this championship: %s\n", nume);
       if(verify_name(nume)==1){
-        strcpy(command,"Editing begins");
+        strcpy(command,"Editing: history. Write 'none' if you don't want to make any changes here");
+        hist_edit = 1;
       }
       else {
         strcpy(command,"This championship doesn't exist");
       }
       editing_initiated = 0;
+  }
+  else if(hist_edit == 1){
+      pthread_mutex_lock(&lock);
+      update("HISTORY",command, nume);
+      hist_edit=0;
+      strcpy(command,"Editing: last-winner. Write 'none' if you don't want to make any changes here");
+      winner_edit= 1;
+      pthread_mutex_unlock(&lock);
+  }
+  else if( winner_edit == 1){
+    pthread_mutex_lock(&lock);
+    update("WINNER",command, nume);
+      winner_edit=0;
+      strcpy(command,"Editing: the date. Write 'none' if you don't want to make any changes here");
+      games_edit= 1;
+      pthread_mutex_unlock(&lock);
+  }
+  else if(games_edit == 1){
+    pthread_mutex_lock(&lock);
+    update("GAMES",command, nume);
+      games_edit=0;
+      strcpy(command,"Editing: the hour. Write 'none' if you don't want to make any changes here");
+      ora_edit= 1;
+      pthread_mutex_unlock(&lock);
+  }
+  else if(ora_edit == 1){
+    pthread_mutex_lock(&lock);
+    update("ORA",command, nume);
+      ora_edit=0;
+      strcpy(command,"Editing: the description. Write 'none' if you don't want to make any changes here");
+      desc_edit= 1;
+      pthread_mutex_unlock(&lock);
+  }
+  else if(desc_edit == 1){
+    pthread_mutex_lock(&lock);
+    update("DESC",command, nume);
+      desc_edit=0;
+      strcpy(command,"Editing done");
+      pthread_mutex_unlock(&lock);
+      printf("Edited done\n");
   }
   else if(participate_initiated == 1){
     pthread_mutex_lock(&lock);
