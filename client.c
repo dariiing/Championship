@@ -168,7 +168,7 @@ int main ()
     editing_client = 1;
   }
   else if(strstr(command,"Editing begins")!=NULL){
-    update_championship(editing_client, command,nume_edit);
+   
   }
   else if(strstr(command,"Goodbye")!=NULL){
     close (sd);
