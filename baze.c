@@ -29,13 +29,12 @@ int main(int argc, char* argv[]) {
    /* Create SQL statement */
 
    sql = "CREATE TABLE ACCOUNTS(" \
-      "USERNAME CHAR(10) NOT NULL,"\
+      "USERNAME CHAR(10) PRIMARY KEY NOT NULL,"\
       "PASSWORD TEXT NOT NULL,"\
       "NAME TEXT NOT NULL,"\
       "ADMIN INT NOT NULL,"\
-      "STRONG TEXT,"
-      "WEAK TEXT,"
-      "ID CHAR(4) PRIMARY KEY NOT NULL,"\
+      "STRONG TEXT,"\
+      "WEAK TEXT,"\
       "EMAIL TEXT NOT NULL);";
 
    /* Execute SQL statement */
@@ -69,16 +68,16 @@ int main(int argc, char* argv[]) {
       printf("Table created successfully\n");
    }
 
-   sql = "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME,ADMIN,STRONG, WEAK, ID, EMAIL) "  \
-         "VALUES ('daria','daria', 'Daria', 1,'tennis','football', 1, 'dariae9@yahoo.com'); " \
-         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME,ADMIN,STRONG, WEAK, ID, EMAIL) "  \
-         "VALUES ('paul','paul', 'Paul', 0,'tennis','chess', 2, 'dariae9@yahoo.com'); " \
-         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME, ADMIN, STRONG, WEAK, ID, EMAIL) "  \
-         "VALUES ('andreea','andreea', 'Andreea', 1,'football','tennis', 3, 'dariae9@yahoo.com'); " \
-         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME, ADMIN, STRONG, WEAK, ID, EMAIL) "  \
-         "VALUES ('stefan','stefan', 'Stefan', 0,'chess', 'football', 4, 'dariae9@yahoo.com'); " \
-         "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, NAME,ADMIN,STRONG, WEAK, ID, EMAIL) "  \
-         "VALUES ('mihai', 'mihai', 'Mihai', 1,'tennis','chess' ,5, 'dariae9@yahoo.com'); " \
+   sql = "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME,ADMIN,STRONG, WEAK, EMAIL) "  \
+         "VALUES ('daria','daria', 'Daria', 1,'tennis','football',  'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME,ADMIN,STRONG, WEAK,  EMAIL) "  \
+         "VALUES ('paul','paul', 'Paul', 0,'tennis','chess', 'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME, ADMIN, STRONG, WEAK,  EMAIL) "  \
+         "VALUES ('andreea','andreea', 'Andreea', 1,'football','tennis',  'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME,PASSWORD, NAME, ADMIN, STRONG, WEAK,  EMAIL) "  \
+         "VALUES ('stefan','stefan', 'Stefan', 0,'chess', 'football',  'dariae9@yahoo.com'); " \
+         "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, NAME,ADMIN,STRONG, WEAK,  EMAIL) "  \
+         "VALUES ('mihai', 'mihai', 'Mihai', 1,'tennis','chess' , 'dariae9@yahoo.com'); " \
          "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, NB_PLAYERS, NR_PARTICIPANTI, PARTICIPANTI, STRUCTURE, HISTORY, WINNER, GAMES, ORA, DESC) "  \
          "VALUES ('International Chess', 'chess', 2, 1,'mihai', 'one round','12/4/15, 17/7/20','Andrei', '2/2/27','12:00','Chess is an abstract strategy game and involves no hidden information. This championship requires experience'); " \
          "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, NB_PLAYERS, NR_PARTICIPANTI, PARTICIPANTI, STRUCTURE,HISTORY, WINNER, GAMES, ORA, DESC) "  \

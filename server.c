@@ -40,6 +40,32 @@ char new_ora[200];
 char new_desc[200];
 char new_nb[200];
 
+//create account
+char admin_pass[] = "admin";
+int acc_user = 0;
+int acc_pass = 0;
+int acc_name = 0;
+int acc_admin = 0;
+int acc_strong = 0;
+int acc_weak = 0;
+int acc_email = 0;
+char acc1[200];
+char acc2[200];
+char acc3[200];
+char acc4[200];
+char acc5[200];
+char acc6[200];
+char acc7[200];
+
+//edit account
+int edit_pass = 0;
+int edit_strong = 0;
+int edit_weak = 0;
+int edit_mail = 0;
+char editp[200];
+char edits[200];
+char editw[200];
+char editm[200];
 //pt update
 char nume[200];
 int hist_edit = 0;
@@ -72,6 +98,14 @@ pthread_mutex_t lock;
 
 int search_username(int idThread, char command[])
 {
+      rc = sqlite3_open("test.db", &db);
+      if(rc){
+        printf("Can't open database: %s\n", sqlite3_errmsg(db));
+        exit(1);
+      }
+      else{
+        printf("Opened database\n");
+      }
       const char *user;
       sqlite3_stmt *stmt;
       sqlite3_prepare_v2(db,"select username from accounts",-1,&stmt,0);
@@ -273,7 +307,7 @@ void create_email(char command[])
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    name = sqlite3_column_text(stmt,0);
-        
+        type = sqlite3_column_text(stmt,1);
 		    if(strstr(command,name)!=0 )  // este acceptat
 		      {
             nb = sqlite3_column_text(stmt,2);
@@ -283,8 +317,8 @@ void create_email(char command[])
             nr_p = atoi(nr);
             printf("nr part: %d si nr inscrisi: %d\n", nb_p, nr_p);
 
-
-            if(strstr(type,weak)==0 && nr_p < nb_p){
+            
+            if(strstr(type,weak)==NULL && nr_p < nb_p){
               char sql[500];
               sprintf(sql, "UPDATE CHAMPIONSHIPS SET NR_PARTICIPANTI = NR_PARTICIPANTI+1 WHERE NAME = '%s';", name);
               printf("%s\n",sql);
@@ -344,6 +378,18 @@ void create_email(char command[])
 }
 void send_email ()
 {
+    sqlite3_stmt *stmt;
+    const char *email;
+    char sql[500];
+    sprintf(sql,"select email from accounts where username = '%s'",username);
+    sqlite3_prepare_v2(db,sql,-1,&stmt,0);
+    while(sqlite3_step(stmt)!=SQLITE_DONE)
+	    {
+		    email=sqlite3_column_text(stmt,0);
+        printf("Email found: %s\n",email);
+	    }
+    rc = sqlite3_finalize(stmt);
+    sqlite3_close(db);
     printf("Request for participation\n");
     CURL *curl;
     CURLcode res;
@@ -397,6 +443,23 @@ void update(char edit[], char command[], char nume[]){
   }
 }
 
+void edit_account(char edit[], char command[], char nume[]){
+  if(strstr(command,"none")==NULL){
+        command[strlen(command)-1]='\0';
+        char sql[500];
+        sprintf(sql, "UPDATE ACCOUNTS SET %s = '%s' WHERE NAME = '%s';",edit, command, nume);
+        printf("%s\n",sql);
+        rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+        if( rc != SQLITE_OK ){
+            printf("SQL error: %s\n", zErrMsg);
+        } else {
+            printf("'%s' edited succesfully\n", edit);
+        }
+      sqlite3_close(db);
+  }
+}
+
+
 void insert(char command[]){
   char sql[5000];
   sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora, new_desc, new_nb);
@@ -407,6 +470,21 @@ void insert(char command[]){
   } else {
       printf("Records created successfully\n");
       strcpy(command,"Championship created");
+  }
+  sqlite3_close(db);
+}
+
+void create_account(char command[]){
+  char sql[5000];
+  sprintf(sql, "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, NAME, ADMIN, STRONG, WEAK, EMAIL) VALUES ('%s','%s','%s',%s,'%s','%s','%s');", acc1, acc2, acc3, acc4, acc5, acc6, acc7);
+  printf("%s\n",sql);
+  rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
+  if( rc != SQLITE_OK ){
+      printf("SQL error: %s\n", zErrMsg);
+      strcpy(command,"The username is already in use. Try again");
+  } else {
+      printf("Records created successfully\n");
+      strcpy(command,"Account created. Please login now");
   }
   sqlite3_close(db);
 }
@@ -448,6 +526,64 @@ void case_answer(int idThread,char command[]){
     create_name = 1;
     strcpy(command,"Write the name for the new championship");
   }
+  else if(strstr(command,"create account")!= NULL && v[idThread].login == 0){
+    printf("Creating\n");
+    strcpy(command,"Enter your username");
+    acc_user = 1;
+  }
+  else if(acc_user == 1){
+      command[strlen(command)-1]='\0';
+      strcpy(acc1,command);
+      acc_user = 0;
+      acc_pass = 1;
+      strcpy(command,"Enter your password");
+  }
+  else if(acc_pass == 1){
+    command[strlen(command)-1]='\0';
+      strcpy(acc2,command);
+      acc_pass = 0;
+      acc_name = 1;
+      strcpy(command,"Enter you name");
+  }
+  else if(acc_name == 1){
+    command[strlen(command)-1]='\0';
+      strcpy(acc3,command);
+      acc_name = 0;
+      acc_admin = 1;
+      strcpy(command,"Enter the pasword for becoming admin");
+  }
+  else if(acc_admin == 1){
+    command[strlen(command)-1]='\0';
+    if(strcmp(command,admin_pass)==0){
+      strcpy(acc4,"1");
+    }
+    else strcpy(acc4,"0");
+    acc_admin = 0;
+    acc_strong = 1;
+    strcpy(command,"Enter your strong points (ex: tennis)");
+  }
+  else if(acc_strong == 1){
+    command[strlen(command)-1]='\0';
+      strcpy(acc5,command);
+      acc_strong = 0;
+      acc_weak = 1;
+      strcpy(command,"Enter your weak points (ex: tennis)");
+  }
+  else if(acc_weak == 1){
+    command[strlen(command)-1]='\0';
+      strcpy(acc6,command);
+      acc_weak = 0;
+      acc_email = 1;
+      strcpy(command,"Enter your email");
+  }
+  else if(acc_email == 1){
+    command[strlen(command)-1]='\0';
+      strcpy(acc7,command);
+      acc_email = 0;
+      pthread_mutex_lock(&lock);
+      create_account(command);
+      pthread_mutex_unlock(&lock);
+  }
   else if(strstr(command,"edit championship")!= NULL && v[idThread].admin == 1){
     strcpy(command,"Write the name of the championship");
     editing_initiated = 1;
@@ -455,6 +591,51 @@ void case_answer(int idThread,char command[]){
   else if(strstr(command,"edit championship")!= NULL && v[idThread].admin == 0){
     printf("Not logged in\n");
     strcpy(command,"Please login as admin");
+  }
+  else if(strstr(command,"edit account")!= NULL && v[idThread].login == 0){
+    printf("Not logged in\n");
+    strcpy(command,"Please login first");
+  }
+  else if(strstr(command,"edit account")!= NULL && v[idThread].login == 1){
+    printf("Not logged in\n");
+    strcpy(command,"Write your new password. If you don't want to change it write 'none'");
+    edit_pass = 1;
+  }
+  else if( edit_pass == 1){
+    command[strlen(command)-1]='\0';
+    edit_pass = 0;
+    if(strcmp(command,"none")!=0){
+      edit_account("PASSWORD",command,username);
+    }
+    edit_strong = 1;
+    strcpy(command,"Write your new strong point. If you don't want to change it write 'none'");
+  }
+  else if( edit_strong == 1){
+    command[strlen(command)-1]='\0';
+    edit_strong = 0;
+    if(strcmp(command,"none")!=0){
+      edit_account("STRONG",command,username);
+    }
+    edit_weak = 1;
+    strcpy(command,"Write your new weak point. If you don't want to change it write 'none'");
+  }
+  else if( edit_weak == 1){
+    command[strlen(command)-1]='\0';
+    edit_weak = 0;
+    if(strcmp(command,"none")!=0){
+      edit_account("WEAK",command,username);
+    }
+    edit_mail= 1;
+    strcpy(command,"Write your new email. If you don't want to change it write 'none'");
+  }
+  else if( edit_mail == 1){
+    command[strlen(command)-1]='\0';
+    edit_mail= 0;
+    if(strcmp(command,"none")!=0){
+      edit_account("EMAIL",command,username);
+    }
+    strcpy(command,"Editing done");
+    
   }
   else if(strstr(command,"history")!= NULL && v[idThread].admin == 1){
     printf("History\n");
