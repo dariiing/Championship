@@ -28,6 +28,7 @@ int create_history = 0;
 int create_winner = 0;
 int create_date = 0;
 int create_ora = 0;
+int create_loc = 0;
 int create_desc = 0;
 int create_nb = 0;
 char new_name[200];
@@ -37,6 +38,7 @@ char new_history[200];
 char new_winner[200];
 char new_date[200];
 char new_ora[200];
+char new_location[200];
 char new_desc[200];
 char new_nb[200];
 
@@ -73,6 +75,7 @@ int winner_edit = 0;
 int games_edit = 0;
 int ora_edit = 0;
 int desc_edit = 0;
+int loc_edit = 0;
 int resc = 0;
 
 //database
@@ -190,8 +193,9 @@ void show_championships()
   const char *structure;
   const char *date;
   const char *ora;
+  const char *loc;
   sqlite3_stmt *stmt;
-  sqlite3_prepare_v2(db,"select name, type, nb_players, structure, games,ora  from championships",-1,&stmt,0);
+  sqlite3_prepare_v2(db,"select name, type, nb_players, structure, games,ora,location  from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    { 
         name=sqlite3_column_text(stmt,0);
@@ -206,6 +210,8 @@ void show_championships()
         fprintf(fp,"Date: %s\n", date);
         ora=sqlite3_column_text(stmt,5);
         fprintf(fp,"Hour: %s\n", ora);
+        loc=sqlite3_column_text(stmt,6);
+        fprintf(fp,"Location: %s\n", loc);
         fprintf(fp,"----------------------------------------\n");
 	    }
       rc = sqlite3_finalize(stmt);
@@ -303,7 +309,8 @@ void create_email(char command[])
   const char *ora;
   const char *desc;
   const char *part;  
-  sqlite3_prepare_v2(db,"select name, type, nb_players, nr_participanti, participanti, structure, games, ora,desc from championships",-1,&stmt,0);
+  const char *location;
+  sqlite3_prepare_v2(db,"select name, type, nb_players, nr_participanti, participanti, structure, games, ora,location, desc from championships",-1,&stmt,0);
   while(sqlite3_step(stmt)!=SQLITE_DONE)
 	    {
 		    name = sqlite3_column_text(stmt,0);
@@ -356,7 +363,9 @@ void create_email(char command[])
               fprintf(fp, "Date: %s\n", date);
               ora=sqlite3_column_text(stmt,7);
               fprintf(fp, "Hour: %s\n", ora);
-              desc=sqlite3_column_text(stmt,8);
+              location = sqlite3_column_text(stmt,8);
+               fprintf(fp, "Location: %s\n", location);
+              desc = sqlite3_column_text(stmt,9);
               fprintf(fp, "Short description: %s\n", desc);
               fprintf(fp,"----------------------------------------\n");
               fprintf(fp, "Good luck!\n");
@@ -376,6 +385,7 @@ void create_email(char command[])
     sqlite3_close(db);
     fclose(fp);
 }
+
 void send_email ()
 {
     sqlite3_stmt *stmt;
@@ -462,7 +472,7 @@ void edit_account(char edit[], char command[], char nume[]){
 
 void insert(char command[]){
   char sql[5000];
-  sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora, new_desc, new_nb);
+  sprintf(sql, "INSERT INTO CHAMPIONSHIPS (NAME, TYPE, STRUCTURE, HISTORY, WINNER, GAMES,ORA,LOCATION, DESC, NB_PLAYERS,NR_PARTICIPANTI, PARTICIPANTI) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s', %s, 0, '');", new_name, new_type, new_structure, new_history, new_winner, new_date, new_ora,new_location, new_desc, new_nb);
   printf("%s\n",sql);
   rc =sqlite3_exec(db,sql,0,0,&zErrMsg);
   if( rc != SQLITE_OK ){
@@ -728,6 +738,13 @@ void case_answer(int idThread,char command[]){
     command[strlen(command)-1]='\0';
     strcpy(new_ora,command);
     create_ora = 0;
+    create_loc = 1;
+    strcpy(command,"Write the location of the championship");
+  }
+  else if(create_loc == 1){
+    command[strlen(command)-1]='\0';
+    strcpy(new_location,command);
+    create_loc = 0;
     create_desc = 1;
     strcpy(command,"Write the description of the championship");
   }
@@ -792,6 +809,14 @@ void case_answer(int idThread,char command[]){
     pthread_mutex_lock(&lock);
     update("ORA",command, nume);
     ora_edit=0;
+    loc_edit = 1;
+    strcpy(command,"Editing: the location. Write 'none' if you don't want to make any changes here");
+    pthread_mutex_unlock(&lock);
+  }
+  else if(loc_edit == 1){
+    pthread_mutex_lock(&lock);
+    update("LOCATION",command, nume);
+    loc_edit = 0;
     strcpy(command,"Editing done");
     pthread_mutex_unlock(&lock);
   }
@@ -881,6 +906,9 @@ int main ()
   int i=0;
   
   /* crearea unui socket */
+  //AF_INET familia de protocoale(ipv4)
+  //SOCK_STREAM server tcp
+  //SOCK_DGRAM 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
     {
       printf ("[server] Eroare la socket().\n");
